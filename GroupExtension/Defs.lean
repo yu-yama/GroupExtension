@@ -68,7 +68,6 @@ structure Equiv {E' : Type*} [Group E'] (S' : GroupExtension N E' G) where
   inl_comm : S'.inl = toMonoidHom.comp S.inl
   /-- The right-hand side of the diagram commutes -/
   rightHom_comm : S.rightHom = S'.rightHom.comp toMonoidHom
-attribute [class] Equiv
 
 end GroupExtension
 
@@ -82,8 +81,8 @@ def toGroupExtension : GroupExtension N (N ⋊[φ] G) G where
   range_inl_eq_ker_rightHom := range_inl_eq_ker_rightHom
   rightHom_surjective := rightHom_surjective
 
-/-- A group extension giving a semidirect product splits -/
-instance : (toGroupExtension φ).Splitting where
+/-- A canonical splitting -/
+def inr_splitting : (toGroupExtension φ).Splitting where
   sectionHom := inr
   rightHom_comp_sectionHom := rightHom_comp_inr
 
