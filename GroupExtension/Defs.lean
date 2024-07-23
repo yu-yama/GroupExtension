@@ -13,8 +13,6 @@ equivalences.
   `1 → N → E → G → 1`
 - `GroupExtension.Equiv S S'`: structure for equivalences of two group extensions `S` and `S'` as
   specific homomorphisms `E → E'` such that the diagram below is commutative.
-- `GroupExtension.Splitting S`: structure for splittings of a group extension `S` of `G` by `N` as
-  section homomorphisms `G → E`
 
 ```text
       ↗︎ E  ↘
@@ -22,6 +20,8 @@ equivalences.
       ↘︎ E' ↗︎️
 ```
 
+- `GroupExtension.Splitting S`: structure for splittings of a group extension `S` of `G` by `N` as
+  section homomorphisms `G → E`
 - `SemidirectProduct.toGroupExtension φ`: a canonical group extension giving a semidirect product,
   `1 → N → N ⋊[φ] G → G → 1`
 
@@ -29,8 +29,8 @@ equivalences.
 
 If `N` is Abelian,
 
-- there is a bijection between `N`-conjugacy classes of splittings of
-  `SemidirectProduct.toGroupExtension φ` and `groupCohomology.H1`
+- there is a bijection between `N`-conjugacy classes of
+  `(SemidirectProduct.toGroupExtension φ).Splitting` and `groupCohomology.H1`
   (which is available in `GroupTheory/GroupExtension/Abelian.lean` to be added in a later PR).
 - there is a bijection between equivalence classes of group extensions and `groupCohomology.H2`
   (which is also stated as a TODO in `RepresentationTheory/GroupCohomology/LowDegree.lean`).
@@ -70,7 +70,7 @@ theorem rightHom_comp_inl : S.rightHom.comp S.inl = 1 := by
   rw [MonoidHom.one_apply, MonoidHom.comp_apply]
   exact S.rightHom_inl n
 
--- TODO: is there a Mathlib shorthand to compose the homomorphism `conjAct`?
+-- TODO: does Mathlib have any definition to compose this homomorphism using more concisely?
 /-- `E` acts on `N` by conjugation -/
 noncomputable def conjAct : E →* MulAut N := {
   toFun := fun e ↦ (MonoidHom.ofInjective S.inl_injective).trans <|
