@@ -11,10 +11,10 @@ equivalences.
 
 - `GroupExtension N E G`: structure for extensions of `G` by `N` as short exact sequences
   `1 → N → E → G → 1`
+- `GroupExtension.Equiv S S'`: structure for equivalences of two group extensions `S` and `S'` as
+  specific homomorphisms `E → E'` such that the diagram below is commutative.
 - `GroupExtension.Splitting S`: structure for splittings of a group extension `S` of `G` by `N` as
   section homomorphisms `G → E`
-- `GroupExtension.Equiv S S'`: structure for equivalences of two group extensions `S` and `S'` as
-  specific homomorphisms `E → E'` such that he diagram below is commutative.
 
 ```text
       ↗︎ E  ↘
@@ -22,14 +22,18 @@ equivalences.
       ↘︎ E' ↗︎️
 ```
 
-- `SemidirectProduct.toGroupExtension φ`: a canonical group extension for a semidirect product,
-  `N → N⋊[φ]G → G`
+- `SemidirectProduct.toGroupExtension φ`: a canonical group extension giving a semidirect product,
+  `1 → N → N ⋊[φ] G → G → 1`
 
 ## TODO
 
-- A bijection between `N`-conjugacy classes of splittings and `groupCohomology.H1`
-- A bijection between equivalence classes of group extensions and `groupCohomology.H2`
+If `N` is Abelian,
 
+- there is a bijection between `N`-conjugacy classes of splittings of
+  `SemidirectProduct.toGroupExtension φ` and `groupCohomology.H1`
+  (which is available in `GroupTheory/GroupExtension/Abelian.lean` to be added in a later PR).
+- there is a bijection between equivalence classes of group extensions and `groupCohomology.H2`
+  (which is also stated as a TODO in `RepresentationTheory/GroupCohomology/LowDegree.lean`).
 -/
 
 variable (N E G : Type*) [Group N] [Group E] [Group G]
@@ -54,9 +58,8 @@ namespace GroupExtension
 variable (S : GroupExtension N E G)
 
 /-- The range of the inclusion map is a normal subgroup -/
-instance normal_inl_range : (S.inl.range).Normal := by
-  rw [S.range_inl_eq_ker_rightHom]
-  exact MonoidHom.normal_ker S.rightHom
+instance normal_inl_range : (S.inl.range).Normal :=
+  S.range_inl_eq_ker_rightHom ▸ S.rightHom.normal_ker
 
 theorem rightHom_inl (n : N) : S.rightHom (S.inl n) = 1 := by
   rw [← MonoidHom.mem_ker, ← S.range_inl_eq_ker_rightHom, MonoidHom.mem_range]
@@ -86,6 +89,15 @@ theorem inl_conjAct_comm {e : E} {n : N} : S.inl (S.conjAct e n) = e * S.inl n *
     MonoidHom.apply_ofInjective_symm]
   rfl
 
+/-- `GroupExtension`s are equivalent iff there is a homomorphism making a commuting diagram -/
+structure Equiv {E' : Type*} [Group E'] (S' : GroupExtension N E' G) where
+  /-- The homomorphism -/
+  toMonoidHom : E →* E'
+  /-- The left-hand side of the diagram commutes -/
+  inl_comm : toMonoidHom.comp S.inl = S'.inl
+  /-- The right-hand side of the diagram commutes -/
+  rightHom_comm : S'.rightHom.comp toMonoidHom = S.rightHom
+
 /-- `Splitting` of a group extension is a section homomorphism -/
 structure Splitting where
   /-- A section homomorphism -/
@@ -100,14 +112,10 @@ instance : FunLike (S.Splitting) G E where
     congr
     exact DFunLike.coe_injective h
 
-/-- `GroupExtension`s are equivalent iff there is a homomorphism making a commuting diagram -/
-structure Equiv {E' : Type*} [Group E'] (S' : GroupExtension N E' G) where
-  /-- The homomorphism -/
-  toMonoidHom : E →* E'
-  /-- The left-hand side of the diagram commutes -/
-  inl_comm : S'.inl = toMonoidHom.comp S.inl
-  /-- The right-hand side of the diagram commutes -/
-  rightHom_comm : S.rightHom = S'.rightHom.comp toMonoidHom
+/-- A splitting of an extension `S` is `N`-conjugate to another iff there exists `n : N` such that
+the section homomorphism is a conjugate of the other section homomorphism by `S.inl n`. -/
+def IsConj (S : GroupExtension N E G) (s s' : S.Splitting) :=
+  ∃ n : N, s.sectionHom = fun g ↦ S.inl n * s'.sectionHom g * (S.inl n)⁻¹
 
 end GroupExtension
 
@@ -120,6 +128,11 @@ def toGroupExtension : GroupExtension N (N ⋊[φ] G) G where
   inl_injective := inl_injective
   range_inl_eq_ker_rightHom := range_inl_eq_ker_rightHom
   rightHom_surjective := rightHom_surjective
+
+theorem toGroupExtension_inl : (toGroupExtension φ).inl = SemidirectProduct.inl := rfl
+
+theorem toGroupExtension_rightHom : (toGroupExtension φ).rightHom = SemidirectProduct.rightHom :=
+  rfl
 
 /-- A canonical splitting -/
 def inr_splitting : (toGroupExtension φ).Splitting where
