@@ -65,7 +65,7 @@ def splitting_ofOneCocycle (f : groupCohomology.oneCocycles (toRep φ)) :
       intro g₁ g₂
       dsimp only
       rw [(groupCohomology.mem_oneCocycles_iff f.val).mp f.property g₁ g₂, toMul_add, mul_comm,
-          Rep.ofMulDistribMulAction_ρ_apply_apply, toMul_ofMul]
+        Rep.ofMulDistribMulAction_ρ_apply_apply, toMul_ofMul]
       rfl
   }
   rightHom_comp_sectionHom := by
@@ -89,7 +89,7 @@ def splitting_equiv_oneCocycles :
     unfold splitting_toOneCocycle splitting_ofOneCocycle
     ext g
     simp only [mk_eq_inl_mul_inr, MonoidHom.coe_mk, OneHom.coe_mk, mul_left, left_inl, right_inl,
-        map_one, left_inr, mul_one]
+      map_one, left_inr, mul_one]
     rfl
 
 /-- Two splittings are `N`-conjugates iff the difference of the corresponding 1-cocycles is a
@@ -108,10 +108,10 @@ theorem isConj_iff_sub_mem_oneCoboundaries (s₁ s₂ : (toGroupExtension φ).Sp
   intro g
   nth_rewrite 3 [show n = Additive.ofMul n by rfl]
   rw [show ((toRep φ).ρ g) n = Additive.ofMul (φ g n) by rfl, sub_eq_iff_eq_add, ← ofMul_div,
-      ← ofMul_mul, Additive.ofMul.apply_eq_iff_eq, SemidirectProduct.ext_iff]
+    ← ofMul_mul, Additive.ofMul.apply_eq_iff_eq, SemidirectProduct.ext_iff]
   simp only [mul_left, mul_right, inv_left, toGroupExtension_inl, left_inl, right_inl,
-      MonoidHom.map_one, one_mul, inv_one, MulAut.one_apply, right_sectionHom, MulEquiv.map_inv,
-      div_eq_mul_inv, mul_right_comm]
+    MonoidHom.map_one, one_mul, inv_one, MulAut.one_apply, right_sectionHom, MulEquiv.map_inv,
+    div_eq_mul_inv, mul_right_comm]
   apply and_iff_left
   rw [← rightHom_eq_right, MonoidHom.map_inv, rightHom_inl, inv_one, mul_one]
 

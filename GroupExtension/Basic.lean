@@ -29,10 +29,10 @@ theorem injective : Function.Injective equiv.toMonoidHom := by
   intro e he
   have he' := congrArg S'.rightHom he
   rw [S'.rightHom.map_one, ← MonoidHom.comp_apply, equiv.rightHom_comm, ← MonoidHom.mem_ker,
-      ← S.range_inl_eq_ker_rightHom] at he'
+    ← S.range_inl_eq_ker_rightHom] at he'
   obtain ⟨n, rfl⟩ := he'
   rw [← MonoidHom.comp_apply, equiv.inl_comm,
-      (injective_iff_map_eq_one' S'.inl).mp S'.inl_injective] at he
+    (injective_iff_map_eq_one' S'.inl).mp S'.inl_injective] at he
   rw [he, S.inl.map_one]
 
 /-- The four lemma (deriving surjectivity) specialized for group extensions -/
@@ -40,7 +40,7 @@ theorem surjective : Function.Surjective equiv.toMonoidHom := by
   intro e'
   obtain ⟨e, he⟩ := S.rightHom_surjective (S'.rightHom e')
   rw [eq_comm, ← equiv.rightHom_comm, MonoidHom.comp_apply, MonoidHom.eq_iff,
-      ← S'.range_inl_eq_ker_rightHom] at he
+    ← S'.range_inl_eq_ker_rightHom] at he
   obtain ⟨n, hn⟩ := he
   use e * S.inl n
   rw [MonoidHom.map_mul, ← MonoidHom.comp_apply, equiv.inl_comm, hn, mul_inv_cancel_left]
@@ -62,10 +62,10 @@ noncomputable def symm : S'.Equiv S where
   toMonoidHom := equiv.toMulEquiv.symm
   inl_comm := by
     rw [← equiv.inl_comm, ← MonoidHom.comp_assoc, toMonoidHom_eq_toMulEquiv,
-        MulEquiv.coe_monoidHom_symm_comp_coe_monoidHom, MonoidHom.id_comp]
+      MulEquiv.coe_monoidHom_symm_comp_coe_monoidHom, MonoidHom.id_comp]
   rightHom_comm := by
     rw [← equiv.rightHom_comm, MonoidHom.comp_assoc, toMonoidHom_eq_toMulEquiv,
-        MulEquiv.coe_monoidHom_comp_coe_monoidHom_symm, MonoidHom.comp_id]
+      MulEquiv.coe_monoidHom_comp_coe_monoidHom_symm, MonoidHom.comp_id]
 
 def trans {E'' : Type*} [Group E''] {S'' : GroupExtension N E'' G} (equiv' : S'.Equiv S'') :
     S.Equiv S'' where
@@ -108,8 +108,8 @@ def equiv_semidirectProduct : (SemidirectProduct.toGroupExtension s.conjAct).Equ
       OneHom.coe_mk, map_mul, rightHom_inl, rightHom_sectionHom, one_mul]
 
 /-- A group given by a split extension is isomorphic to a semidirect product -/
-noncomputable def mulEquiv_semidirectProduct : N ⋊[s.conjAct] G ≃* E
-  := s.equiv_semidirectProduct.toMulEquiv
+noncomputable def mulEquiv_semidirectProduct : N ⋊[s.conjAct] G ≃* E :=
+  s.equiv_semidirectProduct.toMulEquiv
 
 end Splitting
 
