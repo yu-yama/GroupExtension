@@ -8,7 +8,7 @@ import Mathlib.Tactic.Group
 
 This file gives basic lemmas about group extensions.
 
-For the main definitions, see `GroupTheory/GroupExtensions/Defs.lean`.
+For the main definitions, see `GroupTheory/GroupExtension/Defs.lean`.
 -/
 
 variable {N G : Type*} [Group N] [Group G]
