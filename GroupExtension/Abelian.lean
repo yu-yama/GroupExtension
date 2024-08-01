@@ -1,4 +1,6 @@
 import GroupExtension.Basic
+import GroupExtension.Deps.IsCommutative
+import GroupExtension.Deps.LowDegree
 import Mathlib.RepresentationTheory.GroupCohomology.LowDegree
 
 /-!
@@ -10,26 +12,6 @@ For the main definitions, see `GroupTheory/GroupExtension/Defs.lean`. For basic 
 group extensions, see `GroupTheory/GroupExtension/Basic.lean`.
 -/
 
-namespace groupCohomology
-
-universe u
-variable {k : Type u} {G : Type u} [CommRing k] [Group G] {A : Rep k G}
-
--- TODO: does Mathlib have these (or equivalent) lemmas?
-
-lemma oneCocycles_ext_iff (f₁ f₂ : oneCocycles A) :
-    f₁ = f₂ ↔ ∀ g : G, (f₁ : G → CoeSort.coe A) g = (f₂ : G → CoeSort.coe A) g :=
-  ⟨fun a g ↦ congrFun (congrArg Subtype.val a) g, fun h ↦ Subtype.ext (funext fun g ↦ h g)⟩
-
-lemma mem_oneCoboundaries_iff (f : oneCocycles A) :
-    f ∈ oneCoboundaries A ↔
-    ∃ x : CoeSort.coe A, ∀ g : G, A.ρ g x - x = (f : G → CoeSort.coe A) g := by
-  apply exists_congr
-  intro x
-  simp only [LinearMap.codRestrict, dZero, LinearMap.coe_mk, AddHom.coe_mk, oneCocycles_ext_iff]
-
-end groupCohomology
-
 namespace SemidirectProduct
 
 variable {N G : Type} [CommGroup N] [Group G] (φ : G →* MulAut N)
@@ -38,9 +20,7 @@ variable {N G : Type} [CommGroup N] [Group G] (φ : G →* MulAut N)
 noncomputable def toRep (φ : G →* MulAut N) : Rep ℤ G :=
   @Rep.ofMulDistribMulAction G N _ _ (MulDistribMulAction.compHom N φ)
 
-instance : MulDistribMulAction G N := MulDistribMulAction.compHom N φ
-
-/-- Turns a splitting into a corresponding 1-cocyle. -/
+/-- Turns a splitting into the corresponding 1-cocyle. -/
 def splitting_toOneCocycle (s : (toGroupExtension φ).Splitting) :
     groupCohomology.oneCocycles (toRep φ) where
   val := fun g ↦ Additive.ofMul (α := N) (s.sectionHom g).left
@@ -52,7 +32,7 @@ def splitting_toOneCocycle (s : (toGroupExtension φ).Splitting) :
     congr
     exact right_sectionHom s g₁
 
-/-- Turns a 1-cocycle into a corresponding splitting. -/
+/-- Turns a 1-cocycle into the corresponding splitting. -/
 def splitting_ofOneCocycle (f : groupCohomology.oneCocycles (toRep φ)) :
     (toGroupExtension φ).Splitting where
   sectionHom := {
@@ -110,10 +90,10 @@ theorem isConj_iff_sub_mem_oneCoboundaries (s₁ s₂ : (toGroupExtension φ).Sp
   rw [show ((toRep φ).ρ g) n = Additive.ofMul (φ g n) by rfl, sub_eq_iff_eq_add, ← ofMul_div,
     ← ofMul_mul, Additive.ofMul.apply_eq_iff_eq, SemidirectProduct.ext_iff]
   simp only [mul_left, mul_right, inv_left, toGroupExtension_inl, left_inl, right_inl,
-    MonoidHom.map_one, one_mul, inv_one, MulAut.one_apply, right_sectionHom, MulEquiv.map_inv,
-    div_eq_mul_inv, mul_right_comm]
+    map_one, one_mul, inv_one, MulAut.one_apply, right_sectionHom, map_inv, div_eq_mul_inv,
+    mul_right_comm]
   apply and_iff_left
-  rw [← rightHom_eq_right, MonoidHom.map_inv, rightHom_inl, inv_one, mul_one]
+  rw [← rightHom_eq_right, map_inv, rightHom_inl, inv_one, mul_one]
 
 /-- A bijection between the `N`-conjugacy classes of splittings and `H1` -/
 def conjClasses_equiv_h1 : (toGroupExtension φ).ConjClasses ≃ groupCohomology.H1 (toRep φ) :=
@@ -124,3 +104,81 @@ def conjClasses_equiv_h1 : (toGroupExtension φ).ConjClasses ≃ groupCohomology
   )
 
 end SemidirectProduct
+
+namespace GroupExtension
+
+variable {N E G : Type*} [CommGroup N] [Group E] [Group G] (S : GroupExtension N E G)
+
+theorem conjAct_inl (n : N) : S.conjAct (S.inl n) = 1 := by
+  ext _
+  apply S.inl_injective
+  rw [MulAut.one_apply, inl_conjAct_comm]
+  simp only [← map_inv, ← map_mul, mul_inv_cancel_comm]
+
+theorem inl_range_le_conjAct_ker : S.inl.range ≤ S.conjAct.ker :=
+  fun _ ⟨n, hn⟩ ↦ hn ▸ S.conjAct_inl n
+
+theorem conjAct_eq_of_rightHom_eq {e e' : E} (h : S.rightHom e = S.rightHom e') :
+    S.conjAct e = S.conjAct e' := by
+  obtain ⟨_, rfl⟩ := S.rightHom_eq_iff_exists_inl_mul.mp h
+  rw [map_mul, conjAct_inl, one_mul]
+
+noncomputable def conjActMap : G → MulAut N :=
+  fun g ↦ S.conjAct <| S.sectionOneHom g
+
+noncomputable def inducedConjAct : G →* MulAut N :=
+  (QuotientGroup.lift S.inl.range S.conjAct S.inl_range_le_conjAct_ker).comp
+    S.quotientRangeInlEquivRight.symm
+
+end GroupExtension
+
+-- TODO: merge namespaces while keeping variables `N` and `G` unambiguous
+namespace GroupExtension
+
+variable (N G : Type) [CommGroup N] [Group G] [hAct : MulDistribMulAction G N]
+
+structure ofMulDistribMulAction where
+  E : Type*
+  GroupE : Group E
+  extension : GroupExtension N E G
+  smul_eq_conjAct {g : G} {n : N} : g • n = extension.conjActMap g n
+
+namespace ofMulDistribMulAction
+
+variable {N G}
+variable (S S' : ofMulDistribMulAction N G)
+instance : Group S.E := S.GroupE
+instance : Group S'.E := S'.GroupE
+
+def Equiv := S.extension.Equiv S'.extension
+
+/-- The setoid on equivalence of extensions -/
+def setoid : Setoid (ofMulDistribMulAction N G) := sorry
+
+noncomputable def toTwoCocycle :
+    groupCohomology.twoCocycles (Rep.ofMulDistribMulAction G N) where
+  val := fun ⟨g₁, g₂⟩ ↦ Additive.ofMul (α := N) <|
+    Function.invFun S.extension.inl (S.extension.sectionOneHom g₁ * S.extension.sectionOneHom g₂ *
+      (S.extension.sectionOneHom (g₁ * g₂))⁻¹)
+  property := by
+    rw [groupCohomology.mem_twoCocycles_iff]
+    intro g₁ g₂ g₃
+    dsimp
+    repeat rw [← ofMul_mul]
+    rw [Equiv.apply_eq_iff_eq Additive.ofMul]
+    apply S.extension.inl_injective
+    rw [S.smul_eq_conjAct, conjActMap]
+    simp only [map_mul, inl_conjAct_comm,
+      Function.invFun_eq <| S.extension.sectionOneHom_mul_mul_mul_inv_mem_range _ _]
+    rw [Subgroup.mul_comm_of_mem_isCommutative _
+      (S.extension.sectionOneHom_mul_mul_mul_inv_mem_range _ _)
+      (S.extension.sectionOneHom_mul_mul_mul_inv_mem_range _ _)]
+    group
+
+variable (N G)
+theorem toTwoCocycle_surjective : Function.Surjective (@toTwoCocycle N G _ _ hAct) := by
+  sorry
+
+end ofMulDistribMulAction
+
+end GroupExtension

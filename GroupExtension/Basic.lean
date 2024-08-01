@@ -1,5 +1,6 @@
 import GroupExtension.Defs
 import Mathlib.GroupTheory.SemidirectProduct
+import Mathlib.GroupTheory.QuotientGroup
 import Mathlib.Tactic.Group
 
 /-!
@@ -10,14 +11,52 @@ This file gives basic lemmas about group extensions.
 For the main definitions, see `GroupTheory/GroupExtensions/Defs.lean`.
 -/
 
-variable {N E G : Type*} [Group N] [Group E] [Group G]
+variable {N G : Type*} [Group N] [Group G]
 
 namespace GroupExtension
 
+variable {E : Type*} [Group E] (S : GroupExtension N E G)
+
+noncomputable def quotientKerRightHomEquivRight : E ⧸ S.rightHom.ker ≃* G :=
+  QuotientGroup.quotientKerEquivOfSurjective S.rightHom S.rightHom_surjective
+noncomputable def quotientRangeInlEquivRight : E ⧸ S.inl.range ≃* G :=
+  (QuotientGroup.quotientMulEquivOfEq S.range_inl_eq_ker_rightHom).trans S.quotientKerRightHomEquivRight
+
+theorem conjAct_one : S.conjAct 1 = 1 := by
+  ext _
+  apply S.inl_injective
+  rw [inl_conjAct_comm, inv_one, mul_one, one_mul, MulAut.one_apply]
+
+theorem rightHom_eq_iff_exists_inl_mul {e e' : E} :
+    S.rightHom e = S.rightHom e' ↔ ∃ n : N, S.inl n * e' = e := by
+  rw [← mul_inv_eq_one, ← map_inv, ← map_mul, ← MonoidHom.mem_ker, ← S.range_inl_eq_ker_rightHom]
+  exact exists_congr <| fun _ ↦ eq_mul_inv_iff_mul_eq
+
+/-- A set-theoretic section that maps `1 : G` to `1 : E` -/
+noncomputable def sectionOneHom : OneHom G E where
+  toFun :=
+    haveI := Classical.decEq G
+    fun g ↦ if g = 1 then 1 else Function.surjInv S.rightHom_surjective g
+  map_one' := if_pos rfl
+
+theorem rightHom_sectionOneHom (g : G) : S.rightHom (S.sectionOneHom g) = g := by
+  by_cases h : g = 1
+  ·
+    simp only [h, map_one]
+  ·
+    unfold sectionOneHom
+    simp only [OneHom.coe_mk, if_neg h, Function.surjInv_eq S.rightHom_surjective]
+
+-- TODO: rename properly
+theorem sectionOneHom_mul_mul_mul_inv_mem_range (g₁ g₂ : G) :
+    S.sectionOneHom g₁ * S.sectionOneHom g₂ * (S.sectionOneHom (g₁ * g₂))⁻¹ ∈ S.inl.range := by
+  rw [S.range_inl_eq_ker_rightHom, MonoidHom.mem_ker]
+  simp only [map_mul, map_inv, rightHom_sectionOneHom, mul_inv_self]
+
 namespace Equiv
 
-variable {E' : Type*} [Group E'] {S : GroupExtension N E G} {S' : GroupExtension N E' G}
-  (equiv : S.Equiv S')
+variable {S}
+variable {E' : Type*} [Group E'] {S' : GroupExtension N E' G} (equiv : S.Equiv S')
 
 /-- Short exact sequences of equivalent group extensions commute -/
 theorem comm : S.rightHom.comp S.inl = S'.rightHom.comp S'.inl := by
@@ -77,7 +116,8 @@ end Equiv
 
 namespace Splitting
 
-variable {S : GroupExtension N E G} (s : S.Splitting)
+variable {S}
+variable (s : S.Splitting)
 
 theorem rightHom_sectionHom (g : G) : S.rightHom (s.sectionHom g) = g := by
   rw [← MonoidHom.comp_apply, s.rightHom_comp_sectionHom, MonoidHom.id_apply]
@@ -115,8 +155,6 @@ end Splitting
 
 namespace IsConj
 
-variable (S : GroupExtension N E G)
-
 /-- `N`-conjugacy is reflexive. -/
 theorem refl (s : S.Splitting) : S.IsConj s s :=
   ⟨1, by simp only [map_one, inv_one, one_mul, mul_one]⟩
@@ -127,8 +165,8 @@ theorem symm {s₁ s₂ : S.Splitting} (h : S.IsConj s₁ s₂) : S.IsConj s₂ 
   exact ⟨n⁻¹, by simp only [hn, map_inv]; group⟩
 
 /-- `N`-conjugacy is transitive. -/
-theorem trans {s₁ s₂ s₃ : S.Splitting} (h₁ : S.IsConj s₁ s₂) (h₂ : S.IsConj s₂ s₃)
-    : S.IsConj s₁ s₃ := by
+theorem trans {s₁ s₂ s₃ : S.Splitting} (h₁ : S.IsConj s₁ s₂) (h₂ : S.IsConj s₂ s₃) :
+    S.IsConj s₁ s₃ := by
   obtain ⟨n₁, hn₁⟩ := h₁
   obtain ⟨n₂, hn₂⟩ := h₂
   exact ⟨n₁ * n₂, by simp only [hn₁, hn₂, map_mul]; group⟩
