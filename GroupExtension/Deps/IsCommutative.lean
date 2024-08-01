@@ -10,9 +10,7 @@ instance {G : Type*} [CommGroup G] (H : Subgroup G) : H.IsCommutative :=
 @[to_additive]
 lemma mul_comm_of_mem_isCommutative {G : Type*} [Group G] (H : Subgroup G) [H.IsCommutative]
     {a b : G} (ha : a ∈ H) (hb : b ∈ H) : a * b = b * a := by
-  have := mul_comm (⟨a, ha⟩ : H) (⟨b, hb⟩ : H)
-  simp only [Submonoid.mk_mul_mk, Subtype.mk.injEq] at this
-  exact this
+  simpa only [Submonoid.mk_mul_mk, Subtype.mk.injEq] using mul_comm (⟨a, ha⟩ : H) (⟨b, hb⟩ : H)
 
 end Subgroup
 
