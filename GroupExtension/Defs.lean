@@ -61,10 +61,12 @@ variable (S : GroupExtension N E G)
 instance normal_inl_range : (S.inl.range).Normal :=
   S.range_inl_eq_ker_rightHom ▸ S.rightHom.normal_ker
 
+@[simp]
 theorem rightHom_inl (n : N) : S.rightHom (S.inl n) = 1 := by
   rw [← MonoidHom.mem_ker, ← S.range_inl_eq_ker_rightHom, MonoidHom.mem_range]
   exact exists_apply_eq_apply S.inl n
 
+@[simp]
 theorem rightHom_comp_inl : S.rightHom.comp S.inl = 1 := by
   ext n
   rw [MonoidHom.one_apply, MonoidHom.comp_apply]
@@ -72,16 +74,15 @@ theorem rightHom_comp_inl : S.rightHom.comp S.inl = 1 := by
 
 -- TODO: does Mathlib have any definition to compose this homomorphism using more concisely?
 /-- `E` acts on `N` by conjugation. -/
-noncomputable def conjAct : E →* MulAut N := {
-  toFun := fun e ↦ (MonoidHom.ofInjective S.inl_injective).trans <|
+noncomputable def conjAct : E →* MulAut N where
+  toFun e := (MonoidHom.ofInjective S.inl_injective).trans <|
     (MulAut.conjNormal e).trans (MonoidHom.ofInjective S.inl_injective).symm
   map_one' := by
     ext _
     simp only [map_one, MulEquiv.trans_apply, MulAut.one_apply, MulEquiv.symm_apply_apply]
-  map_mul' := fun _ _ ↦ by
+  map_mul' _ _ := by
     ext _
     simp only [map_mul, MulEquiv.trans_apply, MulAut.mul_apply, MulEquiv.apply_symm_apply]
-}
 
 /-- The inclusion and a conjugation commute. -/
 theorem inl_conjAct_comm {e : E} {n : N} : S.inl (S.conjAct e n) = e * S.inl n * e⁻¹ := by
@@ -113,12 +114,12 @@ instance : FunLike (S.Splitting) G E where
     exact DFunLike.coe_injective h
 
 instance : MonoidHomClass (S.Splitting) G E where
-  map_mul := fun s ↦ s.sectionHom.map_mul'
-  map_one := fun s ↦ s.sectionHom.map_one'
+  map_mul s := s.sectionHom.map_mul'
+  map_one s := s.sectionHom.map_one'
 
 /-- A splitting of an extension `S` is `N`-conjugate to another iff there exists `n : N` such that
 the section homomorphism is a conjugate of the other section homomorphism by `S.inl n`. -/
-def IsConj (S : GroupExtension N E G) (s s' : S.Splitting) :=
+def IsConj (S : GroupExtension N E G) (s s' : S.Splitting) : Prop :=
   ∃ n : N, s.sectionHom = fun g ↦ S.inl n * s'.sectionHom g * (S.inl n)⁻¹
 
 end GroupExtension
