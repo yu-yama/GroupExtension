@@ -283,12 +283,10 @@ instance : Group (middleOfTwoCocycle f) where
 
 end middleOfTwoCocycle
 
-#exit
-
 instance extensionOfTwoCocycle : GroupExtension N (middleOfTwoCocycle f) G where
   inl := {
-    toFun := fun n ↦ ⟨n, 1⟩
-    map_one' := rfl
+    toFun := sorry
+    map_one' := sorry
     map_mul' := sorry
   }
   rightHom := sorry
