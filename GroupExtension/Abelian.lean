@@ -145,10 +145,6 @@ lemma sectionOneHom_mul (g₁ g₂ : G) : ∃ n : N,
   rw [map_inv, mul_assoc, ← hn]
   group
 
-lemma sectionOneHom_mul'' (g₁ g₂ : G) : ∃ n : N,
-    S.sectionOneHom (g₁ * g₂) = S.sectionOneHom g₁ * S.sectionOneHom g₂ * S.inl n := by
-  sorry
-
 noncomputable def inducedConjAct : G →* MulAut N where
   toFun := conjActMap S
   map_one' := by
@@ -159,7 +155,7 @@ noncomputable def inducedConjAct : G →* MulAut N where
     simp
     apply S.inl_injective
     simp only [conjActMap_def]
-    obtain ⟨m, hm⟩ := S.sectionOneHom_mul'' g₁ g₂
+    obtain ⟨m, hm⟩ := S.exists_sectionOneHom_mul' g₁ g₂
     rw [hm]
     rw [mul_assoc, mul_assoc, ← mul_assoc (S.inl m)]
     rw [← map_mul S.inl m]
