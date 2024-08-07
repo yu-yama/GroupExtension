@@ -91,14 +91,14 @@ structure Splitting where
   /-- The section is a left inverse of the projection map. -/
   rightHom_comp_sectionHom : S.rightHom.comp sectionHom = MonoidHom.id G
 
-instance : FunLike (S.Splitting) G E where
+instance : FunLike S.Splitting G E where
   coe s := s.sectionHom
   coe_injective' := by
     intro ⟨_, _⟩ ⟨_, _⟩ h
     congr
     exact DFunLike.coe_injective h
 
-instance : MonoidHomClass (S.Splitting) G E where
+instance : MonoidHomClass S.Splitting G E where
   map_mul s := s.sectionHom.map_mul'
   map_one s := s.sectionHom.map_one'
 

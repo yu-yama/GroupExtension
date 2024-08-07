@@ -1,4 +1,4 @@
-import GroupExtension.Defs
+import GroupExtension.Monoid.Defs
 import Mathlib.GroupTheory.SemidirectProduct
 import Mathlib.GroupTheory.QuotientGroup
 import Mathlib.Tactic.Group
@@ -8,14 +8,35 @@ import Mathlib.Tactic.Group
 
 This file gives basic lemmas about group extensions.
 
-For the main definitions, see `GroupTheory/GroupExtension/Defs.lean`.
+For the main definitions, see `GroupTheory/MonoidExtension/Defs.lean`.
 -/
 
-variable {N G : Type*} [Group N] [Group G]
+variable {N E G : Type*}
 
-namespace GroupExtension
+namespace MonoidExtension
 
-variable {E : Type*} [Group E] (S : GroupExtension N E G)
+variable [MulOneClass N] [MulOneClass E] [MulOneClass G] (S : MonoidExtension N E G)
+
+/-- A set-theoretic section that maps `1 : G` to `1 : E` -/
+noncomputable def sectionOneHom : OneHom G E where
+  toFun :=
+    haveI := Classical.decEq G
+    fun g ↦ if g = 1 then 1 else Function.surjInv S.rightHom_surjective g
+  map_one' := if_pos rfl
+
+theorem rightHom_sectionOneHom (g : G) : S.rightHom (S.sectionOneHom g) = g := by
+  by_cases h : g = 1
+  ·
+    simp only [h, map_one]
+  ·
+    unfold sectionOneHom
+    simp only [OneHom.coe_mk, if_neg h, Function.surjInv_eq S.rightHom_surjective]
+
+end MonoidExtension
+
+namespace MonoidExtension
+
+variable [Group N] [Group E] [Group G] (S : MonoidExtension N E G)
 
 noncomputable def quotientKerRightHomEquivRight : E ⧸ S.rightHom.ker ≃* G :=
   QuotientGroup.quotientKerEquivOfSurjective S.rightHom S.rightHom_surjective
@@ -34,21 +55,6 @@ theorem rightHom_eq_iff_exists_inl_mul {e e' : E} :
   rw [← mul_inv_eq_one, ← map_inv, ← map_mul, ← MonoidHom.mem_ker, ← S.range_inl_eq_ker_rightHom]
   exact exists_congr <| fun _ ↦ eq_mul_inv_iff_mul_eq
 
-/-- A set-theoretic section that maps `1 : G` to `1 : E` -/
-noncomputable def sectionOneHom : OneHom G E where
-  toFun :=
-    haveI := Classical.decEq G
-    fun g ↦ if g = 1 then 1 else Function.surjInv S.rightHom_surjective g
-  map_one' := if_pos rfl
-
-theorem rightHom_sectionOneHom (g : G) : S.rightHom (S.sectionOneHom g) = g := by
-  by_cases h : g = 1
-  ·
-    simp only [h, map_one]
-  ·
-    unfold sectionOneHom
-    simp only [OneHom.coe_mk, if_neg h, Function.surjInv_eq S.rightHom_surjective]
-
 -- TODO: rename properly
 theorem sectionOneHom_mul_mul_mul_inv_mem_range (g₁ g₂ : G) :
     S.sectionOneHom g₁ * S.sectionOneHom g₂ * (S.sectionOneHom (g₁ * g₂))⁻¹ ∈ S.inl.range := by
@@ -58,7 +64,7 @@ theorem sectionOneHom_mul_mul_mul_inv_mem_range (g₁ g₂ : G) :
 namespace Equiv
 
 variable {S}
-variable {E' : Type*} [Group E'] {S' : GroupExtension N E' G} (equiv : S.Equiv S')
+variable {E' : Type*} [Group E'] {S' : MonoidExtension N E' G} (equiv : S.Equiv S')
 
 /-- Short exact sequences of equivalent group extensions commute -/
 theorem comm : S.rightHom.comp S.inl = S'.rightHom.comp S'.inl := by
@@ -94,7 +100,7 @@ noncomputable def toMulEquiv : E ≃* E' := MulEquiv.ofBijective equiv.toMonoidH
 
 theorem toMonoidHom_eq_toMulEquiv : equiv.toMonoidHom = equiv.toMulEquiv := rfl
 
-def refl (S : GroupExtension N E G) : S.Equiv S where
+def refl (S : MonoidExtension N E G) : S.Equiv S where
   toMonoidHom := MonoidHom.id E
   inl_comm := MonoidHom.id_comp _
   rightHom_comm := MonoidHom.comp_id _
@@ -108,7 +114,7 @@ noncomputable def symm : S'.Equiv S where
     rw [← equiv.rightHom_comm, MonoidHom.comp_assoc, toMonoidHom_eq_toMulEquiv,
       MulEquiv.coe_monoidHom_comp_coe_monoidHom_symm, MonoidHom.comp_id]
 
-def trans {E'' : Type*} [Group E''] {S'' : GroupExtension N E'' G} (equiv' : S'.Equiv S'') :
+def trans {E'' : Type*} [Group E''] {S'' : MonoidExtension N E'' G} (equiv' : S'.Equiv S'') :
     S.Equiv S'' where
   toMonoidHom := equiv'.toMonoidHom.comp equiv.toMonoidHom
   inl_comm := by rw [MonoidHom.comp_assoc, equiv.inl_comm, equiv'.inl_comm]
@@ -136,16 +142,16 @@ def monoidHom_semidirectProduct : N ⋊[s.conjAct] G →* E where
     group
 
 /-- A split group extension is equivalent to a canonical extension giving a semidirect product. -/
-def equiv_semidirectProduct : (SemidirectProduct.toGroupExtension s.conjAct).Equiv S where
+def equiv_semidirectProduct : (SemidirectProduct.toMonoidExtension s.conjAct).Equiv S where
   toMonoidHom := monoidHom_semidirectProduct s
   inl_comm := by
     ext n
-    simp only [SemidirectProduct.toGroupExtension, MonoidHom.comp_apply,
+    simp only [SemidirectProduct.toMonoidExtension, MonoidHom.comp_apply,
       monoidHom_semidirectProduct, MonoidHom.coe_mk, OneHom.coe_mk, SemidirectProduct.left_inl,
       SemidirectProduct.right_inl, map_one, mul_one]
   rightHom_comm := by
     ext ⟨n, g⟩
-    simp only [SemidirectProduct.toGroupExtension, MonoidHom.comp_apply,
+    simp only [SemidirectProduct.toMonoidExtension, MonoidHom.comp_apply,
       SemidirectProduct.rightHom_eq_right, monoidHom_semidirectProduct, MonoidHom.coe_mk,
       OneHom.coe_mk, map_mul, rightHom_inl, rightHom_sectionHom, one_mul]
 
@@ -185,15 +191,15 @@ def setoid : Setoid S.Splitting where
 end IsConj
 
 /-- The `N`-conjugacy classes of splittings -/
-def ConjClasses (S : GroupExtension N E G) := Quotient <| IsConj.setoid S
+def ConjClasses (S : MonoidExtension N E G) := Quotient <| IsConj.setoid S
 
-end GroupExtension
+end MonoidExtension
 
 namespace SemidirectProduct
 
-variable {φ : G →* MulAut N} (s : (toGroupExtension φ).Splitting)
+variable [Group N] [Group G] {φ : G →* MulAut N} (s : (toMonoidExtension φ).Splitting)
 
 theorem right_sectionHom (g : G) : (s.sectionHom g).right = g := by
-  rw [← rightHom_eq_right, ← toGroupExtension_rightHom, s.rightHom_sectionHom]
+  rw [← rightHom_eq_right, ← toMonoidExtension_rightHom, s.rightHom_sectionHom]
 
 end SemidirectProduct
