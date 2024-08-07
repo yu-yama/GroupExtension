@@ -251,7 +251,7 @@ def ofTwoCocycle : ofMulDistribMulAction N G where
 variable (N G)
 theorem toTwoCocycle_surjective : Function.Surjective (@toTwoCocycle N G _ _ hAct) := by
   intro f
-  let E : Type := middleOfTwoCocycle f
+  sorry
 
 end ofMulDistribMulAction
 
