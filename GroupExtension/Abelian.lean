@@ -128,11 +128,52 @@ theorem conjAct_eq_of_rightHom_eq {e e' : E} (h : S.rightHom e = S.rightHom e') 
 noncomputable def conjActMap : G → MulAut N :=
   fun g ↦ S.conjAct <| S.sectionOneHom g
 
--- This definition is currently unused. Should we use `inducedConjAct` rather than considering any
--- `conjActMap`?
-noncomputable def inducedConjAct : G →* MulAut N :=
-  (QuotientGroup.lift S.inl.range S.conjAct S.inl_range_le_conjAct_ker).comp
-    S.quotientRangeInlEquivRight.symm
+lemma conjActMap_def (g : G) (n : N) : S.inl (S.conjActMap g n) =
+    (S.sectionOneHom g) * (S.inl n) * (S.sectionOneHom g)⁻¹ := by
+  rw [conjActMap, inl_conjAct_comm]
+
+lemma sectionOneHom_mul' (g₁ g₂ : G) : ∃ n : N,
+    S.inl n * S.sectionOneHom (g₁ * g₂) = S.sectionOneHom g₁ * S.sectionOneHom g₂ := by
+  obtain ⟨n, hn⟩ := S.sectionOneHom_mul_mul_mul_inv_mem_range g₁ g₂
+  use n
+  rw [hn]
+  group
+
+lemma sectionOneHom_mul (g₁ g₂ : G) : ∃ n : N,
+    S.sectionOneHom (g₁ * g₂) = S.inl n * S.sectionOneHom g₁ * S.sectionOneHom g₂ := by
+  obtain ⟨n, hn⟩ := S.sectionOneHom_mul' g₁ g₂
+  use n⁻¹
+  rw [map_inv, mul_assoc, ← hn]
+  group
+
+lemma sectionOneHom_mul'' (g₁ g₂ : G) : ∃ n : N,
+    S.sectionOneHom (g₁ * g₂) = S.sectionOneHom g₁ * S.sectionOneHom g₂ * S.inl n := by
+  sorry
+
+noncomputable def inducedConjAct : G →* MulAut N where
+  toFun := conjActMap S
+  map_one' := by
+    simp only [map_one, conjActMap, conjActMap_def, map_one, one_mul, mul_one]
+  map_mul' := by
+    intros g₁ g₂
+    ext n
+    simp
+    apply S.inl_injective
+    simp only [conjActMap_def]
+    obtain ⟨m, hm⟩ := S.sectionOneHom_mul'' g₁ g₂
+    rw [hm]
+    rw [mul_assoc, mul_assoc, ← mul_assoc (S.inl m)]
+    rw [← map_mul S.inl m]
+    rw [mul_comm m n, map_mul]
+    group
+
+#check inl_injective
+
+
+example : inducedConjAct S = S.conjActMap := by
+  ext g n
+  unfold inducedConjAct conjActMap conjAct
+  rfl
 
 end GroupExtension
 
@@ -206,11 +247,11 @@ def mul_def (e₁ e₂ : middleOfTwoCocycle f) :
     e₁.right * e₂.right⟩ := rfl
 
 instance : One (middleOfTwoCocycle f) where
-  one := ⟨1, 1⟩
+  one := ⟨(Additive.toMul (f.1 (1, 1)))⁻¹, 1⟩
 
-def one_def : (1 : middleOfTwoCocycle f) = ⟨1, 1⟩ := rfl
+def one_def : (1 : middleOfTwoCocycle f) = ⟨(Additive.toMul (f.1 (1, 1)))⁻¹, 1⟩ := rfl
 
-def one_left : (1 : middleOfTwoCocycle f).left = 1 := rfl
+def one_left : (1 : middleOfTwoCocycle f).left = (Additive.toMul (f.1 (1, 1)) : N)⁻¹ := rfl
 
 def one_right : (1 : middleOfTwoCocycle f).right = 1 := rfl
 
@@ -218,18 +259,54 @@ instance : Inv (middleOfTwoCocycle f) where
   inv := sorry
 
 instance : Group (middleOfTwoCocycle f) where
-  mul_assoc e₁ e₂ e₃ := sorry
+  mul_assoc e₁ e₂ e₃ := by
+    cases' e₁ with l₁ r₁
+    cases' e₂ with l₂ r₂
+    cases' e₃ with l₃ r₃
+    simp [mul_def]
+    have := (groupCohomology.mem_twoCocycles_def f.1).mp f.2
+    simp at this
+    specialize this r₁ r₂ r₃
+    rw [S.smul_eq_conjAct] at this
+    have this2 : (((S.extension.conjActMap r₁) (Additive.toMul (f.1 (r₂, r₃)))) : N) / (Additive.toMul (f.1 (r₁ * r₂, r₃)) : N) * (Additive.toMul (f.1 (r₁, r₂ * r₃)) : N) / (Additive.toMul (f.1 (r₁, r₂)) : N) = 1 := by
+      exact this
+    rw [div_eq_one] at this2
+    rw [← eq_mul_inv_iff_mul_eq] at this2
+    rw [div_eq_iff_eq_mul] at this2
+    refine ⟨?_, by simp [mul_assoc]⟩
+    simp only [mul_assoc]
+    congr 1
+    congr 1
+    rw [smul_smul]
+    rw [← mul_assoc, mul_comm _ ((r₁ * r₂) • l₃)]
+    rw [mul_assoc]
+    congr 1
+    rw [S.smul_eq_conjAct, this2]
+    rw [← toMul_add]
+    rw [← toMul_neg]
+    rw [← toMul_add]
+    rw [← toMul_add]
+    rw [← toMul_add]
+    abel_nf
   one_mul a := by
     simp only [mul_def, one_left, one_right, one_smul, one_mul]
     congr
-    sorry
+    rw [groupCohomology.twoCocycles_map_one_fst _ (a.right)]
+    rw [mul_comm]
+    group
   mul_one a := by
     simp only [mul_def, one_left, one_right, smul_one, mul_one]
     congr
-    sorry
+    rw [groupCohomology.twoCocycles_map_one_snd _ (a.right)]
+    rw [mul_assoc]
+    convert mul_one _
+    rw [smul_inv']
+    convert mul_left_inv (a.right • Additive.toMul (f.1 (1, 1))) using 1
   mul_left_inv := sorry
 
 end middleOfTwoCocycle
+
+#exit
 
 instance extensionOfTwoCocycle : GroupExtension N (middleOfTwoCocycle f) G where
   inl := {
