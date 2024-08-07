@@ -234,69 +234,51 @@ variable (f : groupCohomology.twoCocycles (Rep.ofMulDistribMulAction G N))
 namespace middleOfTwoCocycle
 
 instance : Mul (middleOfTwoCocycle f) where
-  mul e₁ e₂ := ⟨e₁.left * e₁.right • e₂.left * (Additive.toMul (f.val ⟨e₁.right, e₂.right⟩) : N),
+  mul e₁ e₂ := ⟨e₁.left * e₁.right • e₂.left * Additive.toMul (α := N) (f.val ⟨e₁.right, e₂.right⟩),
     e₁.right * e₂.right⟩
 
-def mul_def (e₁ e₂ : middleOfTwoCocycle f) :
-  e₁ * e₂ = ⟨e₁.left * e₁.right • e₂.left * (Additive.toMul (f.val ⟨e₁.right, e₂.right⟩) : N),
+theorem mul_def (e₁ e₂ : middleOfTwoCocycle f) :
+  e₁ * e₂ = ⟨e₁.left * e₁.right • e₂.left * Additive.toMul (α := N) (f.val ⟨e₁.right, e₂.right⟩),
     e₁.right * e₂.right⟩ := rfl
 
+@[simp]
+theorem mul_left (e₁ e₂ : middleOfTwoCocycle f) : (e₁ * e₂).left =
+  e₁.left * e₁.right • e₂.left * Additive.toMul (α := N) (f.val ⟨e₁.right, e₂.right⟩) := rfl
+
+@[simp]
+theorem mul_right (e₁ e₂ : middleOfTwoCocycle f) : (e₁ * e₂).right = e₁.right * e₂.right := rfl
+
 instance : One (middleOfTwoCocycle f) where
-  one := ⟨(Additive.toMul (f.1 (1, 1)))⁻¹, 1⟩
+  one := ⟨(Additive.toMul <| f.val ⟨1, 1⟩)⁻¹, 1⟩
 
-def one_def : (1 : middleOfTwoCocycle f) = ⟨(Additive.toMul (f.1 (1, 1)))⁻¹, 1⟩ := rfl
+@[simp]
+theorem one_left : (1 : middleOfTwoCocycle f).left = (Additive.toMul <| f.val ⟨1, 1⟩ : N)⁻¹ := rfl
 
-def one_left : (1 : middleOfTwoCocycle f).left = (Additive.toMul (f.1 (1, 1)) : N)⁻¹ := rfl
-
-def one_right : (1 : middleOfTwoCocycle f).right = 1 := rfl
+@[simp]
+theorem one_right : (1 : middleOfTwoCocycle f).right = 1 := rfl
 
 instance : Inv (middleOfTwoCocycle f) where
   inv := sorry
 
 instance : Group (middleOfTwoCocycle f) where
-  mul_assoc e₁ e₂ e₃ := by
-    cases' e₁ with l₁ r₁
-    cases' e₂ with l₂ r₂
-    cases' e₃ with l₃ r₃
-    simp [mul_def]
-    have := (groupCohomology.mem_twoCocycles_def f.1).mp f.2
-    simp at this
-    specialize this r₁ r₂ r₃
-    rw [S.smul_eq_conjAct] at this
-    have this2 : (((S.extension.conjActMap r₁) (Additive.toMul (f.1 (r₂, r₃)))) : N) / (Additive.toMul (f.1 (r₁ * r₂, r₃)) : N) * (Additive.toMul (f.1 (r₁, r₂ * r₃)) : N) / (Additive.toMul (f.1 (r₁, r₂)) : N) = 1 := by
-      exact this
-    rw [div_eq_one] at this2
-    rw [← eq_mul_inv_iff_mul_eq] at this2
-    rw [div_eq_iff_eq_mul] at this2
-    refine ⟨?_, by simp [mul_assoc]⟩
-    simp only [mul_assoc]
-    congr 1
-    congr 1
-    rw [smul_smul]
-    rw [← mul_assoc, mul_comm _ ((r₁ * r₂) • l₃)]
-    rw [mul_assoc]
-    congr 1
-    rw [S.smul_eq_conjAct, this2]
-    rw [← toMul_add]
-    rw [← toMul_neg]
-    rw [← toMul_add]
-    rw [← toMul_add]
-    rw [← toMul_add]
-    abel_nf
+  mul_assoc := by
+    intro ⟨n₁, g₁⟩ ⟨n₂, g₂⟩ ⟨n₃, g₃⟩
+    ext
+    ·
+      simp only [mul_left, mul_right, smul_mul', mul_smul]
+      rw [mul_assoc _ _ (g₁ • g₂ • n₃), mul_comm _ (g₁ • g₂ • n₃)]
+      repeat rw [mul_assoc]
+      rw [← toMul_add, add_comm, (groupCohomology.mem_twoCocycles_iff f.val).mp f.property g₁ g₂ g₃,
+        toMul_add]
+      rfl
+    ·
+      simp only [mul_right, mul_assoc]
   one_mul a := by
-    simp only [mul_def, one_left, one_right, one_smul, one_mul]
-    congr
-    rw [groupCohomology.twoCocycles_map_one_fst _ (a.right)]
-    rw [mul_comm]
-    group
+    simp only [mul_def, one_left, one_right, one_smul, one_mul,
+      groupCohomology.twoCocycles_map_one_fst f a.right, inv_mul_cancel_comm]
   mul_one a := by
-    simp only [mul_def, one_left, one_right, smul_one, mul_one]
-    congr
-    rw [groupCohomology.twoCocycles_map_one_snd _ (a.right)]
-    rw [mul_assoc]
-    convert mul_one _
-    rw [smul_inv']
-    convert mul_left_inv (a.right • Additive.toMul (f.1 (1, 1))) using 1
+    simp only [mul_def, one_left, one_right, mul_one, smul_inv', toMul_ofMul, inv_mul_cancel_right,
+      groupCohomology.twoCocycles_map_one_snd f a.right, Rep.ofMulDistribMulAction_ρ_apply_apply]
   mul_left_inv := sorry
 
 end middleOfTwoCocycle
