@@ -123,15 +123,18 @@ theorem conjAct_eq_of_rightHom_eq {e e' : E} (h : S.rightHom e = S.rightHom e') 
   obtain ⟨_, rfl⟩ := S.rightHom_eq_iff_exists_inl_mul.mp h
   rw [map_mul, conjAct_inl, one_mul]
 
-/-- `G` acts on `N` by conjugation. This action is well-defined as `N` is abelian. -/
-noncomputable def conjActMap : G → MulAut N :=
-  fun g ↦ S.conjAct <| S.sectionOneHom g
-
--- This definition is currently unused. Should we use `inducedConjAct` rather than considering any
--- `conjActMap`?
-noncomputable def inducedConjAct : G →* MulAut N :=
-  (QuotientGroup.lift S.inl.range S.conjAct S.inl_range_le_conjAct_ker).comp
-    S.quotientRangeInlEquivRight.symm
+/-- `G` acts on `N` by conjugation. -/
+noncomputable def inducedConjAct : G →* MulAut N where
+  toFun g := S.conjAct <| S.sectionOneHom g
+  map_one' := by
+    simp only [map_one]
+  map_mul' g₁ g₂ := by
+    ext n
+    apply S.inl_injective
+    simp only [MulAut.mul_apply, inl_conjAct_comm]
+    obtain ⟨n', hn'⟩ := S.exists_sectionOneHom_mul' g₁ g₂
+    rw [hn', mul_assoc _ (S.inl n'), ← S.inl.map_mul, mul_comm, map_mul]
+    group
 
 end GroupExtension
 
@@ -144,7 +147,7 @@ structure ofMulDistribMulAction where
   E : Type*
   GroupE : Group E
   extension : GroupExtension N E G
-  smul_eq_conjAct {g : G} {n : N} : g • n = extension.conjActMap g n
+  smul_eq_inducedConjAct {g : G} {n : N} : g • n = extension.inducedConjAct g n
 
 namespace ofMulDistribMulAction
 
@@ -178,8 +181,8 @@ noncomputable def toTwoCocycle :
     repeat rw [← ofMul_mul]
     rw [Equiv.apply_eq_iff_eq Additive.ofMul]
     apply S.extension.inl_injective
-    rw [S.smul_eq_conjAct, conjActMap]
-    simp only [map_mul, inl_conjAct_comm,
+    rw [S.smul_eq_inducedConjAct, inducedConjAct]
+    simp only [map_mul, inl_conjAct_comm, MonoidHom.coe_mk, OneHom.coe_mk,
       Function.invFun_eq <| S.extension.sectionOneHom_mul_mul_mul_inv_mem_range _ _]
     rw [Subgroup.mul_comm_of_mem_isCommutative _
       (S.extension.sectionOneHom_mul_mul_mul_inv_mem_range _ _)
@@ -197,43 +200,59 @@ variable (f : groupCohomology.twoCocycles (Rep.ofMulDistribMulAction G N))
 namespace middleOfTwoCocycle
 
 instance : Mul (middleOfTwoCocycle f) where
-  mul e₁ e₂ := ⟨e₁.left * e₁.right • e₂.left * (Additive.toMul (f.val ⟨e₁.right, e₂.right⟩) : N),
+  mul e₁ e₂ := ⟨e₁.left * e₁.right • e₂.left * Additive.toMul (α := N) (f.val ⟨e₁.right, e₂.right⟩),
     e₁.right * e₂.right⟩
 
-def mul_def (e₁ e₂ : middleOfTwoCocycle f) :
-  e₁ * e₂ = ⟨e₁.left * e₁.right • e₂.left * (Additive.toMul (f.val ⟨e₁.right, e₂.right⟩) : N),
+theorem mul_def (e₁ e₂ : middleOfTwoCocycle f) :
+  e₁ * e₂ = ⟨e₁.left * e₁.right • e₂.left * Additive.toMul (α := N) (f.val ⟨e₁.right, e₂.right⟩),
     e₁.right * e₂.right⟩ := rfl
 
+@[simp]
+theorem mul_left (e₁ e₂ : middleOfTwoCocycle f) : (e₁ * e₂).left =
+  e₁.left * e₁.right • e₂.left * Additive.toMul (α := N) (f.val ⟨e₁.right, e₂.right⟩) := rfl
+
+@[simp]
+theorem mul_right (e₁ e₂ : middleOfTwoCocycle f) : (e₁ * e₂).right = e₁.right * e₂.right := rfl
+
 instance : One (middleOfTwoCocycle f) where
-  one := ⟨1, 1⟩
+  one := ⟨(Additive.toMul <| f.val ⟨1, 1⟩)⁻¹, 1⟩
 
-def one_def : (1 : middleOfTwoCocycle f) = ⟨1, 1⟩ := rfl
+@[simp]
+theorem one_left : (1 : middleOfTwoCocycle f).left = (Additive.toMul <| f.val ⟨1, 1⟩ : N)⁻¹ := rfl
 
-def one_left : (1 : middleOfTwoCocycle f).left = 1 := rfl
-
-def one_right : (1 : middleOfTwoCocycle f).right = 1 := rfl
+@[simp]
+theorem one_right : (1 : middleOfTwoCocycle f).right = 1 := rfl
 
 instance : Inv (middleOfTwoCocycle f) where
   inv := sorry
 
 instance : Group (middleOfTwoCocycle f) where
-  mul_assoc e₁ e₂ e₃ := sorry
+  mul_assoc := by
+    intro ⟨n₁, g₁⟩ ⟨n₂, g₂⟩ ⟨n₃, g₃⟩
+    ext
+    ·
+      simp only [mul_left, mul_right, smul_mul', mul_smul]
+      rw [mul_assoc _ _ (g₁ • g₂ • n₃), mul_comm _ (g₁ • g₂ • n₃)]
+      repeat rw [mul_assoc]
+      rw [← toMul_add, add_comm, (groupCohomology.mem_twoCocycles_iff f.val).mp f.property g₁ g₂ g₃,
+        toMul_add]
+      rfl
+    ·
+      simp only [mul_right, mul_assoc]
   one_mul a := by
-    simp only [mul_def, one_left, one_right, one_smul, one_mul]
-    congr
-    sorry
+    simp only [mul_def, one_left, one_right, one_smul, one_mul,
+      groupCohomology.twoCocycles_map_one_fst f a.right, inv_mul_cancel_comm]
   mul_one a := by
-    simp only [mul_def, one_left, one_right, smul_one, mul_one]
-    congr
-    sorry
+    simp only [mul_def, one_left, one_right, mul_one, smul_inv', toMul_ofMul, inv_mul_cancel_right,
+      groupCohomology.twoCocycles_map_one_snd f a.right, Rep.ofMulDistribMulAction_ρ_apply_apply]
   mul_left_inv := sorry
 
 end middleOfTwoCocycle
 
 instance extensionOfTwoCocycle : GroupExtension N (middleOfTwoCocycle f) G where
   inl := {
-    toFun := fun n ↦ ⟨n, 1⟩
-    map_one' := rfl
+    toFun := sorry
+    map_one' := sorry
     map_mul' := sorry
   }
   rightHom := sorry
@@ -245,7 +264,7 @@ def ofTwoCocycle : ofMulDistribMulAction N G where
   E := middleOfTwoCocycle f
   GroupE := inferInstance
   extension := extensionOfTwoCocycle f
-  smul_eq_conjAct := sorry
+  smul_eq_inducedConjAct := sorry
 
 variable (N G)
 theorem toTwoCocycle_surjective : Function.Surjective (@toTwoCocycle N G _ _ hAct) := by

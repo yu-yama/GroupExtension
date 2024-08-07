@@ -55,6 +55,37 @@ theorem sectionOneHom_mul_mul_mul_inv_mem_range (g₁ g₂ : G) :
   rw [S.range_inl_eq_ker_rightHom, MonoidHom.mem_ker]
   simp only [map_mul, map_inv, rightHom_sectionOneHom, mul_inv_self]
 
+theorem sectionOneHom_mul_inv_mul_mul_mem_range (g₁ g₂ : G) :
+    (S.sectionOneHom (g₁ * g₂))⁻¹ * S.sectionOneHom g₁ * S.sectionOneHom g₂ ∈ S.inl.range := by
+  rw [S.range_inl_eq_ker_rightHom, MonoidHom.mem_ker]
+  simp only [map_mul, map_inv, rightHom_sectionOneHom, mul_assoc, inv_mul_self]
+
+theorem exists_inl_mul_sectionOneHom_mul (g₁ g₂ : G) :
+    ∃ n : N, S.inl n * S.sectionOneHom (g₁ * g₂) = S.sectionOneHom g₁ * S.sectionOneHom g₂ := by
+  obtain ⟨n, hn⟩ := S.sectionOneHom_mul_mul_mul_inv_mem_range g₁ g₂
+  use n
+  rw [hn, inv_mul_cancel_right]
+
+theorem exists_sectionOneHom_mul (g₁ g₂ : G) :
+    ∃ n : N, S.sectionOneHom (g₁ * g₂) = S.inl n * S.sectionOneHom g₁ * S.sectionOneHom g₂ := by
+  obtain ⟨n, hn⟩ := S.exists_inl_mul_sectionOneHom_mul g₁ g₂
+  use n⁻¹
+  rw [mul_assoc, map_inv, eq_inv_mul_iff_mul_eq]
+  exact hn
+
+theorem exists_sectionOneHom_mul_mul_inl (g₁ g₂ : G) :
+    ∃ n : N, S.sectionOneHom (g₁ * g₂) * S.inl n = S.sectionOneHom g₁ * S.sectionOneHom g₂ := by
+  obtain ⟨n, hn⟩ := S.sectionOneHom_mul_inv_mul_mul_mem_range g₁ g₂
+  use n
+  rw [hn, mul_assoc, mul_inv_cancel_left]
+
+theorem exists_sectionOneHom_mul' (g₁ g₂ : G) :
+    ∃ n : N, S.sectionOneHom (g₁ * g₂) = S.sectionOneHom g₁ * S.sectionOneHom g₂ * S.inl n := by
+  obtain ⟨n, hn⟩ := S.exists_sectionOneHom_mul_mul_inl g₁ g₂
+  use n⁻¹
+  rw [map_inv, eq_mul_inv_iff_mul_eq]
+  exact hn
+
 namespace Equiv
 
 variable {S}
