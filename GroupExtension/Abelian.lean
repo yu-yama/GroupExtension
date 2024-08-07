@@ -123,52 +123,18 @@ theorem conjAct_eq_of_rightHom_eq {e e' : E} (h : S.rightHom e = S.rightHom e') 
   obtain ⟨_, rfl⟩ := S.rightHom_eq_iff_exists_inl_mul.mp h
   rw [map_mul, conjAct_inl, one_mul]
 
-/-- `G` acts on `N` by conjugation. This action is well-defined as `N` is abelian. -/
-noncomputable def conjActMap : G → MulAut N :=
-  fun g ↦ S.conjAct <| S.sectionOneHom g
-
-lemma conjActMap_def (g : G) (n : N) : S.inl (S.conjActMap g n) =
-    (S.sectionOneHom g) * (S.inl n) * (S.sectionOneHom g)⁻¹ := by
-  rw [conjActMap, inl_conjAct_comm]
-
-lemma sectionOneHom_mul' (g₁ g₂ : G) : ∃ n : N,
-    S.inl n * S.sectionOneHom (g₁ * g₂) = S.sectionOneHom g₁ * S.sectionOneHom g₂ := by
-  obtain ⟨n, hn⟩ := S.sectionOneHom_mul_mul_mul_inv_mem_range g₁ g₂
-  use n
-  rw [hn]
-  group
-
-lemma sectionOneHom_mul (g₁ g₂ : G) : ∃ n : N,
-    S.sectionOneHom (g₁ * g₂) = S.inl n * S.sectionOneHom g₁ * S.sectionOneHom g₂ := by
-  obtain ⟨n, hn⟩ := S.sectionOneHom_mul' g₁ g₂
-  use n⁻¹
-  rw [map_inv, mul_assoc, ← hn]
-  group
-
+/-- `G` acts on `N` by conjugation. -/
 noncomputable def inducedConjAct : G →* MulAut N where
-  toFun := conjActMap S
+  toFun g := S.conjAct <| S.sectionOneHom g
   map_one' := by
-    simp only [map_one, conjActMap, conjActMap_def, map_one, one_mul, mul_one]
-  map_mul' := by
-    intros g₁ g₂
+    simp only [map_one]
+  map_mul' g₁ g₂ := by
     ext n
-    simp
     apply S.inl_injective
-    simp only [conjActMap_def]
-    obtain ⟨m, hm⟩ := S.exists_sectionOneHom_mul' g₁ g₂
-    rw [hm]
-    rw [mul_assoc, mul_assoc, ← mul_assoc (S.inl m)]
-    rw [← map_mul S.inl m]
-    rw [mul_comm m n, map_mul]
+    simp only [MulAut.mul_apply, inl_conjAct_comm]
+    obtain ⟨n', hn'⟩ := S.exists_sectionOneHom_mul' g₁ g₂
+    rw [hn', mul_assoc _ (S.inl n'), ← S.inl.map_mul, mul_comm, map_mul]
     group
-
-#check inl_injective
-
-
-example : inducedConjAct S = S.conjActMap := by
-  ext g n
-  unfold inducedConjAct conjActMap conjAct
-  rfl
 
 end GroupExtension
 
@@ -181,7 +147,7 @@ structure ofMulDistribMulAction where
   E : Type*
   GroupE : Group E
   extension : GroupExtension N E G
-  smul_eq_conjAct {g : G} {n : N} : g • n = extension.conjActMap g n
+  smul_eq_inducedConjAct {g : G} {n : N} : g • n = extension.inducedConjAct g n
 
 namespace ofMulDistribMulAction
 
@@ -215,8 +181,8 @@ noncomputable def toTwoCocycle :
     repeat rw [← ofMul_mul]
     rw [Equiv.apply_eq_iff_eq Additive.ofMul]
     apply S.extension.inl_injective
-    rw [S.smul_eq_conjAct, conjActMap]
-    simp only [map_mul, inl_conjAct_comm,
+    rw [S.smul_eq_inducedConjAct, inducedConjAct]
+    simp only [map_mul, inl_conjAct_comm, MonoidHom.coe_mk, OneHom.coe_mk,
       Function.invFun_eq <| S.extension.sectionOneHom_mul_mul_mul_inv_mem_range _ _]
     rw [Subgroup.mul_comm_of_mem_isCommutative _
       (S.extension.sectionOneHom_mul_mul_mul_inv_mem_range _ _)
@@ -298,7 +264,7 @@ def ofTwoCocycle : ofMulDistribMulAction N G where
   E := middleOfTwoCocycle f
   GroupE := inferInstance
   extension := extensionOfTwoCocycle f
-  smul_eq_conjAct := sorry
+  smul_eq_inducedConjAct := sorry
 
 variable (N G)
 theorem toTwoCocycle_surjective : Function.Surjective (@toTwoCocycle N G _ _ hAct) := by
