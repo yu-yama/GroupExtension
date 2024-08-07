@@ -1,5 +1,4 @@
 import GroupExtension.Monoid.Basic
-import GroupExtension.Deps.IsCommutative
 import GroupExtension.Deps.LowDegree
 import Mathlib.RepresentationTheory.GroupCohomology.LowDegree
 
