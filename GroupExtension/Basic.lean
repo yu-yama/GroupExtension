@@ -1,6 +1,6 @@
 import GroupExtension.Defs
 import Mathlib.GroupTheory.SemidirectProduct
-import Mathlib.GroupTheory.QuotientGroup
+import Mathlib.GroupTheory.QuotientGroup.Basic
 import Mathlib.Tactic.Group
 
 /-!
@@ -53,12 +53,12 @@ theorem rightHom_sectionOneHom (g : G) : S.rightHom (S.sectionOneHom g) = g := b
 theorem sectionOneHom_mul_mul_mul_inv_mem_range (g₁ g₂ : G) :
     S.sectionOneHom g₁ * S.sectionOneHom g₂ * (S.sectionOneHom (g₁ * g₂))⁻¹ ∈ S.inl.range := by
   rw [S.range_inl_eq_ker_rightHom, MonoidHom.mem_ker]
-  simp only [map_mul, map_inv, rightHom_sectionOneHom, mul_inv_self]
+  simp only [map_mul, map_inv, rightHom_sectionOneHom, mul_inv_cancel]
 
 theorem sectionOneHom_mul_inv_mul_mul_mem_range (g₁ g₂ : G) :
     (S.sectionOneHom (g₁ * g₂))⁻¹ * S.sectionOneHom g₁ * S.sectionOneHom g₂ ∈ S.inl.range := by
   rw [S.range_inl_eq_ker_rightHom, MonoidHom.mem_ker]
-  simp only [map_mul, map_inv, rightHom_sectionOneHom, mul_assoc, inv_mul_self]
+  simp only [map_mul, map_inv, rightHom_sectionOneHom, mul_assoc, inv_mul_cancel]
 
 theorem exists_inl_mul_sectionOneHom_mul (g₁ g₂ : G) :
     ∃ n : N, S.inl n * S.sectionOneHom (g₁ * g₂) = S.sectionOneHom g₁ * S.sectionOneHom g₂ := by
@@ -91,6 +91,7 @@ namespace Equiv
 variable {S}
 variable {E' : Type*} [Group E'] {S' : GroupExtension N E' G} (equiv : S.Equiv S')
 
+include equiv in
 /-- Short exact sequences of equivalent group extensions commute -/
 theorem comm : S.rightHom.comp S.inl = S'.rightHom.comp S'.inl := by
   rw [← equiv.rightHom_comm, MonoidHom.comp_assoc, equiv.inl_comm]
