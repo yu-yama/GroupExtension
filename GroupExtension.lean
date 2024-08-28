@@ -3,4 +3,3 @@
 import «GroupExtension».Defs
 import «GroupExtension».Basic
 import «GroupExtension».Abelian
-import «GroupExtension».AbelianNormalized
