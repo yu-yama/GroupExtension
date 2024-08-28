@@ -34,57 +34,136 @@ theorem rightHom_eq_iff_exists_inl_mul {e e' : E} :
   rw [← mul_inv_eq_one, ← map_inv, ← map_mul, ← MonoidHom.mem_ker, ← S.range_inl_eq_ker_rightHom]
   exact exists_congr <| fun _ ↦ eq_mul_inv_iff_mul_eq
 
-/-- A set-theoretic section that maps `1 : G` to `1 : E` -/
-noncomputable def sectionOneHom : OneHom G E where
-  toFun :=
-    haveI := Classical.decEq G
-    fun g ↦ if g = 1 then 1 else Function.surjInv S.rightHom_surjective g
-  map_one' := if_pos rfl
+structure Section where
+  toFun : G → E
+  is_section : Function.LeftInverse S.rightHom toFun
 
-theorem rightHom_sectionOneHom (g : G) : S.rightHom (S.sectionOneHom g) = g := by
-  by_cases h : g = 1
-  ·
-    simp only [h, map_one]
-  ·
-    unfold sectionOneHom
-    simp only [OneHom.coe_mk, if_neg h, Function.surjInv_eq S.rightHom_surjective]
+section
 
--- TODO: rename properly
-theorem sectionOneHom_mul_mul_mul_inv_mem_range (g₁ g₂ : G) :
-    S.sectionOneHom g₁ * S.sectionOneHom g₂ * (S.sectionOneHom (g₁ * g₂))⁻¹ ∈ S.inl.range := by
+variable {S}
+
+instance : FunLike S.Section G E where
+  coe := Section.toFun
+  coe_injective' := fun ⟨_, _⟩ ⟨_, _⟩ _ ↦ by congr
+
+@[simp]
+theorem coe_section_mk (s : G → E) (hs : Function.LeftInverse S.rightHom s) :
+    (GroupExtension.Section.mk s hs : G → E) = s := rfl
+
+variable (σ : S.Section)
+
+@[simp]
+theorem rightHom_section (g : G) : S.rightHom (σ g) = g := σ.is_section g
+
+@[simp]
+theorem rightHom_comp_section : S.rightHom ∘ σ = id := Function.LeftInverse.comp_eq_id σ.is_section
+
+section
+
+variable (σ' : S.Section) (g : G)
+
+theorem section_mul_inv_mem_range : σ g * (σ' g)⁻¹ ∈ S.inl.range := by
+  simp only [S.range_inl_eq_ker_rightHom, MonoidHom.mem_ker, map_mul, map_inv, rightHom_section,
+    mul_inv_cancel]
+
+theorem section_inv_mul_mem_range : (σ g)⁻¹ * σ' g ∈ S.inl.range := by
+  simp only [S.range_inl_eq_ker_rightHom, MonoidHom.mem_ker, map_mul, map_inv, rightHom_section,
+    inv_mul_cancel]
+
+theorem exists_inl_mul_section : ∃ n : N, σ g = S.inl n * σ' g := by
+  obtain ⟨n, hn⟩ := section_mul_inv_mem_range σ σ' g
+  exact ⟨n, by rw [hn, inv_mul_cancel_right]⟩
+
+theorem exists_section_mul_inl : ∃ n : N, σ g = σ' g * S.inl n := by
+  obtain ⟨n, hn⟩ := section_inv_mul_mem_range σ' σ g
+  exact ⟨n, by rw [hn, mul_inv_cancel_left]⟩
+
+end
+
+variable (g₁ g₂ : G)
+
+theorem section_mul_mul_mul_inv_mem_range : σ g₁ * σ g₂ * (σ (g₁ * g₂))⁻¹ ∈ S.inl.range := by
   rw [S.range_inl_eq_ker_rightHom, MonoidHom.mem_ker]
-  simp only [map_mul, map_inv, rightHom_sectionOneHom, mul_inv_cancel]
+  simp only [map_mul, map_inv, rightHom_section, mul_inv_cancel]
 
-theorem sectionOneHom_mul_inv_mul_mul_mem_range (g₁ g₂ : G) :
-    (S.sectionOneHom (g₁ * g₂))⁻¹ * S.sectionOneHom g₁ * S.sectionOneHom g₂ ∈ S.inl.range := by
+theorem section_mul_inv_mul_mul_mem_range : (σ (g₁ * g₂))⁻¹ * σ g₁ * σ g₂ ∈ S.inl.range := by
   rw [S.range_inl_eq_ker_rightHom, MonoidHom.mem_ker]
-  simp only [map_mul, map_inv, rightHom_sectionOneHom, mul_assoc, inv_mul_cancel]
+  simp only [map_mul, map_inv, rightHom_section, mul_assoc, inv_mul_cancel]
 
-theorem exists_inl_mul_sectionOneHom_mul (g₁ g₂ : G) :
-    ∃ n : N, S.inl n * S.sectionOneHom (g₁ * g₂) = S.sectionOneHom g₁ * S.sectionOneHom g₂ := by
-  obtain ⟨n, hn⟩ := S.sectionOneHom_mul_mul_mul_inv_mem_range g₁ g₂
-  use n
-  rw [hn, inv_mul_cancel_right]
+theorem exists_inl_mul_section_mul : ∃ n : N, S.inl n * σ (g₁ * g₂) = σ g₁ * σ g₂ := by
+  obtain ⟨n, hn⟩ := section_mul_mul_mul_inv_mem_range σ g₁ g₂
+  exact ⟨n, hn ▸ inv_mul_cancel_right _ _⟩
 
-theorem exists_sectionOneHom_mul (g₁ g₂ : G) :
-    ∃ n : N, S.sectionOneHom (g₁ * g₂) = S.inl n * S.sectionOneHom g₁ * S.sectionOneHom g₂ := by
-  obtain ⟨n, hn⟩ := S.exists_inl_mul_sectionOneHom_mul g₁ g₂
+theorem exists_section_mul : ∃ n : N, σ (g₁ * g₂) = S.inl n * σ g₁ * σ g₂ := by
+  obtain ⟨n, hn⟩ := exists_inl_mul_section_mul σ g₁ g₂
   use n⁻¹
   rw [mul_assoc, map_inv, eq_inv_mul_iff_mul_eq]
   exact hn
 
-theorem exists_sectionOneHom_mul_mul_inl (g₁ g₂ : G) :
-    ∃ n : N, S.sectionOneHom (g₁ * g₂) * S.inl n = S.sectionOneHom g₁ * S.sectionOneHom g₂ := by
-  obtain ⟨n, hn⟩ := S.sectionOneHom_mul_inv_mul_mul_mem_range g₁ g₂
+theorem exists_section_mul_mul_inl : ∃ n : N, σ (g₁ * g₂) * S.inl n = σ g₁ * σ g₂ := by
+  obtain ⟨n, hn⟩ := section_mul_inv_mul_mul_mem_range σ g₁ g₂
   use n
   rw [hn, mul_assoc, mul_inv_cancel_left]
 
-theorem exists_sectionOneHom_mul' (g₁ g₂ : G) :
-    ∃ n : N, S.sectionOneHom (g₁ * g₂) = S.sectionOneHom g₁ * S.sectionOneHom g₂ * S.inl n := by
-  obtain ⟨n, hn⟩ := S.exists_sectionOneHom_mul_mul_inl g₁ g₂
+theorem exists_section_mul' : ∃ n : N, σ (g₁ * g₂) = σ g₁ * σ g₂ * S.inl n := by
+  obtain ⟨n, hn⟩ := exists_section_mul_mul_inl σ g₁ g₂
   use n⁻¹
   rw [map_inv, eq_mul_inv_iff_mul_eq]
   exact hn
+
+end
+
+-- /-- A set-theoretic section that maps `1 : G` to `1 : E` -/
+-- noncomputable def sectionOneHom : OneHom G E where
+--   toFun :=
+--     haveI := Classical.decEq G
+--     fun g ↦ if g = 1 then 1 else Function.surjInv S.rightHom_surjective g
+--   map_one' := if_pos rfl
+
+-- theorem rightHom_sectionOneHom (g : G) : S.rightHom (S.sectionOneHom g) = g := by
+--   by_cases h : g = 1
+--   ·
+--     simp only [h, map_one]
+--   ·
+--     unfold sectionOneHom
+--     simp only [OneHom.coe_mk, if_neg h, Function.surjInv_eq S.rightHom_surjective]
+
+-- -- TODO: rename properly
+-- theorem sectionOneHom_mul_mul_mul_inv_mem_range (g₁ g₂ : G) :
+--     S.sectionOneHom g₁ * S.sectionOneHom g₂ * (S.sectionOneHom (g₁ * g₂))⁻¹ ∈ S.inl.range := by
+--   rw [S.range_inl_eq_ker_rightHom, MonoidHom.mem_ker]
+--   simp only [map_mul, map_inv, rightHom_sectionOneHom, mul_inv_cancel]
+
+-- theorem sectionOneHom_mul_inv_mul_mul_mem_range (g₁ g₂ : G) :
+--     (S.sectionOneHom (g₁ * g₂))⁻¹ * S.sectionOneHom g₁ * S.sectionOneHom g₂ ∈ S.inl.range := by
+--   rw [S.range_inl_eq_ker_rightHom, MonoidHom.mem_ker]
+--   simp only [map_mul, map_inv, rightHom_sectionOneHom, mul_assoc, inv_mul_cancel]
+
+-- theorem exists_inl_mul_sectionOneHom_mul (g₁ g₂ : G) :
+--     ∃ n : N, S.inl n * S.sectionOneHom (g₁ * g₂) = S.sectionOneHom g₁ * S.sectionOneHom g₂ := by
+--   obtain ⟨n, hn⟩ := S.sectionOneHom_mul_mul_mul_inv_mem_range g₁ g₂
+--   use n
+--   rw [hn, inv_mul_cancel_right]
+
+-- theorem exists_sectionOneHom_mul (g₁ g₂ : G) :
+--     ∃ n : N, S.sectionOneHom (g₁ * g₂) = S.inl n * S.sectionOneHom g₁ * S.sectionOneHom g₂ := by
+--   obtain ⟨n, hn⟩ := S.exists_inl_mul_sectionOneHom_mul g₁ g₂
+--   use n⁻¹
+--   rw [mul_assoc, map_inv, eq_inv_mul_iff_mul_eq]
+--   exact hn
+
+-- theorem exists_sectionOneHom_mul_mul_inl (g₁ g₂ : G) :
+--     ∃ n : N, S.sectionOneHom (g₁ * g₂) * S.inl n = S.sectionOneHom g₁ * S.sectionOneHom g₂ := by
+--   obtain ⟨n, hn⟩ := S.sectionOneHom_mul_inv_mul_mul_mem_range g₁ g₂
+--   use n
+--   rw [hn, mul_assoc, mul_inv_cancel_left]
+
+-- theorem exists_sectionOneHom_mul' (g₁ g₂ : G) :
+--     ∃ n : N, S.sectionOneHom (g₁ * g₂) = S.sectionOneHom g₁ * S.sectionOneHom g₂ * S.inl n := by
+--   obtain ⟨n, hn⟩ := S.exists_sectionOneHom_mul_mul_inl g₁ g₂
+--   use n⁻¹
+--   rw [map_inv, eq_mul_inv_iff_mul_eq]
+--   exact hn
 
 namespace Equiv
 
@@ -124,7 +203,7 @@ theorem bijective : Function.Bijective equiv.toMonoidHom := ⟨equiv.injective, 
 /-- A homomorphism between equivalent group extensions is indeed an isomorphism -/
 noncomputable def toMulEquiv : E ≃* E' := MulEquiv.ofBijective equiv.toMonoidHom equiv.bijective
 
-theorem toMonoidHom_eq_toMulEquiv : equiv.toMonoidHom = equiv.toMulEquiv := rfl
+theorem toMulEquiv_eq_toMonoidHom : equiv.toMulEquiv = equiv.toMonoidHom := rfl
 
 def refl (S : GroupExtension N E G) : S.Equiv S where
   toMonoidHom := MonoidHom.id E
@@ -134,10 +213,10 @@ def refl (S : GroupExtension N E G) : S.Equiv S where
 noncomputable def symm : S'.Equiv S where
   toMonoidHom := equiv.toMulEquiv.symm
   inl_comm := by
-    rw [← equiv.inl_comm, ← MonoidHom.comp_assoc, toMonoidHom_eq_toMulEquiv,
+    rw [← equiv.inl_comm, ← MonoidHom.comp_assoc, ← toMulEquiv_eq_toMonoidHom,
       MulEquiv.coe_monoidHom_symm_comp_coe_monoidHom, MonoidHom.id_comp]
   rightHom_comm := by
-    rw [← equiv.rightHom_comm, MonoidHom.comp_assoc, toMonoidHom_eq_toMulEquiv,
+    rw [← equiv.rightHom_comm, MonoidHom.comp_assoc, ← toMulEquiv_eq_toMonoidHom,
       MulEquiv.coe_monoidHom_comp_coe_monoidHom_symm, MonoidHom.comp_id]
 
 def trans {E'' : Type*} [Group E''] {S'' : GroupExtension N E'' G} (equiv' : S'.Equiv S'') :
