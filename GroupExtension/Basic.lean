@@ -40,6 +40,11 @@ structure Section where
 
 section
 
+noncomputable def rightHomSurjInv : S.Section := {
+  toFun := Function.surjInv S.rightHom_surjective
+  is_section := fun g ↦ Function.surjInv_eq S.rightHom_surjective g
+}
+
 variable {S}
 
 instance : FunLike S.Section G E where
