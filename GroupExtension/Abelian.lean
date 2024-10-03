@@ -153,10 +153,13 @@ theorem inducedConjAct_eq (σ' : S.Section) : σ.inducedConjAct = σ'.inducedCon
   apply conjAct_eq_of_rightHom_eq
   simp only [rightHom_section]
 
+theorem inl_inducedConjAct_comm {g : G} {n : N} :
+    S.inl (σ.inducedConjAct g n) = σ g * S.inl n * (σ g)⁻¹ := S.inl_conjAct_comm
+
 end Section
 
 /-- `G` acts on `N` by conjugation. -/
-noncomputable def inducedConjAct : G →* MulAut N := Section.inducedConjAct S.rightHomSurjInv
+noncomputable def inducedConjAct : G →* MulAut N := Section.inducedConjAct S.surjInvRightHom
 
 end
 
@@ -261,19 +264,19 @@ noncomputable def toTwoCocycle :
     repeat rw [← ofMul_mul]
     rw [Equiv.apply_eq_iff_eq Additive.ofMul]
     apply S.extension.inl_injective
-    rw [S.smul_eq_inducedConjAct', Section.inducedConjAct]
-    simp only [map_mul, inl_conjAct_comm, MonoidHom.coe_mk, OneHom.coe_mk]
-    repeat rw [Function.invFun_eq <| S.extension.section_mul_mul_mul_inv_mem_range _ _ _]
+    rw [S.smul_eq_inducedConjAct']
+    simp only [map_mul, Section.inl_inducedConjAct_comm,
+      Function.invFun_eq <| Section.section_mul_mul_mul_inv_mem_range _ _ _]
     rw [Subgroup.mul_comm_of_mem_isCommutative _
-      (S.extension.section_mul_mul_mul_inv_mem_range _ _ _)
-      (S.extension.section_mul_mul_mul_inv_mem_range _ _ _)]
+      (Section.section_mul_mul_mul_inv_mem_range _ _ _)
+      (Section.section_mul_mul_mul_inv_mem_range _ _ _)]
     group
 
 theorem inl_toTwoCocycle (g₁ g₂ : G) :
     S.extension.inl (Additive.toMul (α := N) (S.toTwoCocycle.val (g₁, g₂))) =
     S.σ g₁ * S.σ g₂ * (S.σ (g₁ * g₂))⁻¹ := by
   simp only [toTwoCocycle, toMul_ofMul,
-    Function.invFun_eq <| S.extension.section_mul_mul_mul_inv_mem_range S.σ g₁ g₂]
+    Function.invFun_eq <| Section.section_mul_mul_mul_inv_mem_range S.σ g₁ g₂]
 
 end ofMulDistribMulActionWithSection
 
@@ -473,10 +476,10 @@ def toTwoCocycle_ofTwoCocycle :
   apply (extensionOfTwoCocycle f).inl_injective
   rw [toMul_ofMul,
     Function.invFun_eq <|
-      (extensionOfTwoCocycle f).section_mul_mul_mul_inv_mem_range _ g₁ g₂,
+      Section.section_mul_mul_mul_inv_mem_range _ g₁ g₂,
     extensionOfTwoCocycle_inl]
   simp only [sectionOfTwoCocycle, middleOfTwoCocycle.mul_def, middleOfTwoCocycle.inv_left,
-    middleOfTwoCocycle.inv_right, mul_inv, smul_mul', smul_inv', coe_section_mk, smul_one, mul_one,
+    middleOfTwoCocycle.inv_right, mul_inv, smul_mul', smul_inv', Section.coe_mk, smul_one, mul_one,
     one_mul, inv_one, mul_inv_cancel, middleOfTwoCocycle.smul_map_inv_eq, inv_inv,
     middleOfTwoCocycle.map_one_snd (g₁ * g₂)]
   rw [mul_right_comm _ _ ((g₁ * g₂) • Additive.toMul (α := N) (f.val (1, 1)))⁻¹,
@@ -503,9 +506,8 @@ def ofTwoCocycleToTwoCocycleEquiv (S : ofMulDistribMulActionWithSection N G) :
       intro ⟨n₁, g₁⟩ ⟨n₂, g₂⟩
       unfold ofTwoCocycle
       simp only [map_mul, inl_toTwoCocycle]
-      rw [S.smul_eq_inducedConjAct', Section.inducedConjAct]
-      simp only [MonoidHom.coe_mk, OneHom.coe_mk, inl_conjAct_comm, ← mul_assoc,
-        inv_mul_cancel_right]
+      rw [S.smul_eq_inducedConjAct', Section.inl_inducedConjAct_comm]
+      simp only [← mul_assoc, inv_mul_cancel_right]
   }
   inl_comm := by
     unfold ofTwoCocycle extensionOfTwoCocycle
@@ -517,11 +519,11 @@ def ofTwoCocycleToTwoCocycleEquiv (S : ofMulDistribMulActionWithSection N G) :
     unfold ofTwoCocycle extensionOfTwoCocycle
     ext ⟨n, g⟩
     simp only [MonoidHom.comp_apply, MonoidHom.coe_mk, OneHom.coe_mk, map_mul, rightHom_inl,
-      rightHom_section, one_mul, middleOfTwoCocycle.rightHom]
+      Section.rightHom_section, one_mul, middleOfTwoCocycle.rightHom]
   section_comm := by
     unfold ofTwoCocycle sectionOfTwoCocycle
     ext g
-    simp only [Function.comp_apply, MonoidHom.coe_mk, OneHom.coe_mk, coe_section_mk, map_one,
+    simp only [Function.comp_apply, MonoidHom.coe_mk, OneHom.coe_mk, Section.coe_mk, map_one,
       one_mul]
 
 noncomputable def equivTwoCocycles :
@@ -534,42 +536,131 @@ noncomputable def equivTwoCocycles :
     exact ⟨ofTwoCocycleToTwoCocycleEquiv S⟩
   right_inv f := by rw [Quotient.lift_mk (s := setoid N G), toTwoCocycle_ofTwoCocycle]
 
+-- TODO: is it more preferred to construct the corresponding 2-coboundary in a separate definition?
+theorem sub_mem_twoCoboundaries_of_toofMulDistribMulAction_equiv
+    {S S' : ofMulDistribMulActionWithSection N G}
+    (equiv : S.toofMulDistribMulAction.Equiv S'.toofMulDistribMulAction) :
+    S.toTwoCocycle - S'.toTwoCocycle ∈
+    groupCohomology.twoCoboundaries (Rep.ofMulDistribMulAction G N) := by
+  use fun g ↦ Additive.ofMul (α := N) <| Function.invFun S'.extension.inl <|
+    S.σ.ofEquiv equiv g * (S'.σ g)⁻¹
+  ext ⟨g₁, g₂⟩
+  simp only [LinearMap.codRestrict_apply, groupCohomology.dOne_apply,
+    Rep.ofMulDistribMulAction_ρ_apply_apply, AddSubgroupClass.coe_sub, Pi.sub_apply]
+  apply (Additive.toMul (α := N)).injective
+  simp only [Rep.ofMulDistribMulAction_ρ_apply_apply, toMul_ofMul, AddSubgroupClass.coe_sub,
+    Pi.sub_apply, S.σ.ofEquiv_def]
+  rw [toMul_add, toMul_sub, toMul_sub]
+  apply S'.extension.inl_injective
+  simp only [toMul_ofMul, div_eq_mul_inv, S'.smul_eq_inducedConjAct',
+    Section.inducedConjAct_eq S'.σ (S.σ.ofEquiv equiv), map_mul, map_inv,
+    inl_toTwoCocycle, (S.σ.ofEquiv equiv).inl_inducedConjAct_comm,
+    Function.invFun_eq (S.σ.equiv_mul_inv_mem_range equiv S'.σ _)]
+  rw [← equiv.inl_comm, MonoidHom.comp_apply, inl_toTwoCocycle]
+  simp only [map_mul, map_inv, mul_inv_rev, inv_inv, ← mul_assoc]
+  congr 1
+  simp only [mul_assoc]
+  congr 2
+  rw [inv_mul_eq_iff_eq_mul]
+  simp only [← mul_assoc _ _ (S'.σ g₂)⁻¹]
+  have := DFunLike.congr_arg S'.extension.inl <|
+    MulEquiv.ext_iff.mp (MonoidHom.ext_iff.mp (S'.σ.inducedConjAct_eq {
+      toFun := fun g ↦ (S.σ.ofEquiv equiv g₁)⁻¹ * S'.σ (g₁ * g)
+      is_section := by
+        intro g
+        simp only [map_mul, map_inv, Section.rightHom_section, inv_mul_cancel_left]
+    }) g₂) (Function.invFun S'.extension.inl ((S.σ.ofEquiv equiv (g₁ * g₂))⁻¹ * S'.σ (g₁ * g₂)))
+  simp only [Section.inl_inducedConjAct_comm, Section.ofEquiv, Section.coe_mk, Function.comp_apply,
+    Function.invFun_eq <| S.σ.inv_equiv_mul_mem_range equiv S'.σ (g₁ * g₂)] at this
+  rw [this]
+  simp only [mul_inv_rev, inv_inv, mul_assoc, mul_inv_cancel_left, Section.ofEquiv_def]
+
+noncomputable def toofMulDistribMulActionEquivOfTwoCocycleMulInvEq
+    {f f' : groupCohomology.twoCocycles (Rep.ofMulDistribMulAction G N)} {x : G → N}
+    (h : ∀ g₁ g₂ : G, Additive.toMul (α := N) (f.val (g₁, g₂)) *
+      (Additive.toMul (α := N) (f'.val (g₁, g₂)))⁻¹ = g₁ • x g₂ * (x (g₁ * g₂))⁻¹ * x g₁) :
+    (ofTwoCocycle f).toofMulDistribMulAction.Equiv (ofTwoCocycle f').toofMulDistribMulAction where
+  toMonoidHom := {
+    toFun := fun ⟨n, g⟩ ↦ ⟨n * x g, g⟩
+    map_one' := by
+      unfold ofTwoCocycle
+      specialize h 1 1
+      rw [one_smul, one_mul, inv_mul_cancel_right] at h
+      simp only [← h, inv_mul_cancel_left, ← middleOfTwoCocycle.one_def]
+    map_mul' := by
+      intro ⟨n₁, g₁⟩ ⟨n₂, g₂⟩
+      simp only [ofTwoCocycle, middleOfTwoCocycle.mul_def]
+      ext
+      ·
+        rw [mul_right_comm, ← mul_inv_eq_iff_eq_mul]
+        simp only [mul_assoc]
+        rw [h, mul_comm _ (x g₁), mul_comm (x (g₁ * g₂)), mul_assoc, inv_mul_cancel_right,
+          mul_comm (g₁ • n₂), mul_assoc, mul_comm n₂, smul_mul']
+      ·
+        rfl
+  }
+  inl_comm := by
+    ext n
+    specialize h 1 1
+    rw [one_smul, one_mul, inv_mul_cancel_right] at h
+    simp only [ofTwoCocycle, extensionOfTwoCocycle, middleOfTwoCocycle.inl, MonoidHom.comp_apply,
+      MonoidHom.coe_mk, OneHom.coe_mk, ← h, mul_assoc, inv_mul_cancel_left]
+  rightHom_comm := by
+    ext ⟨_, g⟩
+    simp only [ofTwoCocycle, extensionOfTwoCocycle_rightHom, middleOfTwoCocycle.rightHom,
+      MonoidHom.comp_apply, MonoidHom.coe_mk, OneHom.coe_mk]
+
 end ofMulDistribMulActionWithSection
 
 namespace ofMulDistribMulAction
 
+-- TODO: remove as it is no longer used after `sub_mem_twoCoboundaries_of_equiv` is moved
+theorem inl_toTwoCocycle (S : ofMulDistribMulAction N G) (σ : S.extension.Section) (g₁ g₂ : G) :
+    S.extension.inl (Additive.toMul (α := N)
+      (({ S with σ := σ } : ofMulDistribMulActionWithSection N G).toTwoCocycle.val (g₁, g₂))) =
+    σ g₁ * σ g₂ * (σ (g₁ * g₂))⁻¹ :=
+  ofMulDistribMulActionWithSection.inl_toTwoCocycle { S with σ := σ } g₁ g₂
+
+-- TODO: is it more preferred to construct the corresponding 2-coboundary in a separate definition?
 theorem sub_mem_twoCoboundaries_of_equiv {S S' : ofMulDistribMulAction N G} (equiv : S.Equiv S')
     (σ : S.extension.Section) (σ' : S'.extension.Section) :
     ({ S with σ := σ } : ofMulDistribMulActionWithSection N G).toTwoCocycle -
     ({ S' with σ := σ' } : ofMulDistribMulActionWithSection N G).toTwoCocycle ∈
-    groupCohomology.twoCoboundaries (Rep.ofMulDistribMulAction G N) := by
-  sorry
+    groupCohomology.twoCoboundaries (Rep.ofMulDistribMulAction G N) :=
+  ofMulDistribMulActionWithSection.sub_mem_twoCoboundaries_of_toofMulDistribMulAction_equiv equiv
 
 noncomputable def toH2 (S : ofMulDistribMulAction N G) :
     groupCohomology.H2 (Rep.ofMulDistribMulAction G N) :=
-  Quotient.mk _ (ofMulDistribMulActionWithSection.toTwoCocycle {
-    S with σ := S.extension.rightHomSurjInv
-  })
+  Quotient.mk _ <| ofMulDistribMulActionWithSection.toTwoCocycle {
+    S with σ := S.extension.surjInvRightHom
+  }
 
 def ofH2 (f : groupCohomology.twoCocycles (Rep.ofMulDistribMulAction G N)) :
     EquivClasses N G :=
   Quotient.mk _ (ofMulDistribMulActionWithSection.ofTwoCocycle f).toofMulDistribMulAction
 
-def equivOfSubMemTwoCoboundaries
+theorem exists_twoCocycle_mul_inv_eq_of_sub_mem_twoCoboundaries
     {f f' : groupCohomology.twoCocycles (Rep.ofMulDistribMulAction G N)}
     (h : f - f' ∈ groupCohomology.twoCoboundaries (Rep.ofMulDistribMulAction G N)) :
-    (ofMulDistribMulActionWithSection.ofTwoCocycle f).toofMulDistribMulAction.Equiv
-    (ofMulDistribMulActionWithSection.ofTwoCocycle f').toofMulDistribMulAction where
-  toMonoidHom := sorry
-  inl_comm := sorry
-  rightHom_comm := sorry
+    ∃ x : G → N, ∀ g₁ g₂ : G, Additive.toMul (α := N) (f.val (g₁, g₂)) *
+    (Additive.toMul (α := N) (f'.val (g₁, g₂)))⁻¹ = g₁ • x g₂ * (x (g₁ * g₂))⁻¹ * x g₁ := by
+  rw [groupCohomology.mem_twoCoboundaries_iff] at h
+  obtain ⟨x, hx⟩ := h
+  use fun g ↦ Additive.toMul (α := N) (x g)
+  intro g₁ g₂
+  specialize hx g₁ g₂
+  apply (Additive.toMul (α := N)).injective at hx
+  rw [Rep.ofMulDistribMulAction_ρ_apply_apply, toMul_sub, toMul_ofMul] at hx
+  simp only [← div_eq_mul_inv, hx]
 
 noncomputable def equivH2 :
     EquivClasses N G ≃ groupCohomology.H2 (Rep.ofMulDistribMulAction G N) where
   toFun := Quotient.lift toH2 fun _ _ ⟨equiv⟩ ↦ (Quotient.eq (r := Submodule.quotientRel _)).mpr <|
     (Submodule.quotientRel_r_def _).mpr <| sub_mem_twoCoboundaries_of_equiv equiv _ _
   invFun := Quotient.lift ofH2 fun _ _ h ↦ (Quotient.eq (r := setoid N G)).mpr
-    ⟨equivOfSubMemTwoCoboundaries ((Submodule.quotientRel_r_def _).mp h)⟩
+    ⟨ofMulDistribMulActionWithSection.toofMulDistribMulActionEquivOfTwoCocycleMulInvEq
+      (exists_twoCocycle_mul_inv_eq_of_sub_mem_twoCoboundaries <|
+        (Submodule.quotientRel_r_def _).mp h).choose_spec⟩
   left_inv := by
     rintro ⟨S⟩
     unfold ofH2 toH2
@@ -577,15 +668,22 @@ noncomputable def equivH2 :
     simp only [Quotient.lift_mk, Quotient.eq (r := setoid N G)]
     exact ⟨(ofMulDistribMulActionWithSection.ofTwoCocycleToTwoCocycleEquiv {
       toofMulDistribMulAction := S,
-      σ := S.extension.rightHomSurjInv
+      σ := S.extension.surjInvRightHom
     }).toEquiv⟩
   right_inv := by
-    rintro ⟨S⟩
+    rintro ⟨f⟩
     unfold ofH2 toH2
     rw [← Quotient.mk]
-    simp only [Quotient.lift_mk]
-    rw [Quotient.eq (r := Submodule.quotientRel _)]
-    sorry
+    simp only [Quotient.lift_mk, Quotient.eq (r := Submodule.quotientRel _), HasEquiv.Equiv,
+      instHasEquivOfSetoid, Submodule.quotientRel_r_def]
+    simpa only [ofMulDistribMulActionWithSection.toTwoCocycle_ofTwoCocycle] using
+      ofMulDistribMulActionWithSection.sub_mem_twoCoboundaries_of_toofMulDistribMulAction_equiv
+      (Equiv.refl (ofMulDistribMulActionWithSection.ofTwoCocycle f).toofMulDistribMulAction.extension)
+      (S := {
+        (ofMulDistribMulActionWithSection.ofTwoCocycle f).toofMulDistribMulAction with
+        σ := (ofMulDistribMulActionWithSection.ofTwoCocycle f).extension.surjInvRightHom
+      })
+      (S' := ofMulDistribMulActionWithSection.ofTwoCocycle f)
 
 end ofMulDistribMulAction
 
