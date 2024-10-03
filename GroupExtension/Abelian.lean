@@ -241,7 +241,7 @@ instance setoid : Setoid (ofMulDistribMulActionWithSection N G) where
     trans := fun ⟨equiv⟩ ⟨equiv'⟩ ↦ ⟨{
       GroupExtension.Equiv.trans equiv.toEquiv equiv'.toEquiv with
       section_comm := by
-        simp only [GroupExtension.Equiv.trans, MonoidHom.coe_comp, Function.comp.assoc,
+        simp only [GroupExtension.Equiv.trans, MonoidHom.coe_comp, Function.comp_assoc,
           equiv.section_comm, equiv'.section_comm]
     }⟩
   }
