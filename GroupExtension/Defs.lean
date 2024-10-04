@@ -80,9 +80,7 @@ namespace AddGroupExtension
 variable [AddGroup N] [AddGroup E] [AddGroup G] (S : AddGroupExtension N E G)
 
 /-- `AddGroupExtension`s are equivalent iff there is a homomorphism making a commuting diagram. -/
-structure Equiv {E' : Type*} [AddGroup E'] (S' : AddGroupExtension N E' G) where
-  /-- The homomorphism -/
-  toAddMonoidHom : E →+ E'
+structure Equiv {E' : Type*} [AddGroup E'] (S' : AddGroupExtension N E' G) extends E →+ E' where
   /-- The left-hand side of the diagram commutes. -/
   inl_comm : toAddMonoidHom.comp S.inl = S'.inl
   /-- The right-hand side of the diagram commutes. -/
@@ -138,9 +136,7 @@ theorem inl_conjAct_comm {e : E} {n : N} : S.inl (S.conjAct e n) = e * S.inl n *
 
 /-- `GroupExtension`s are equivalent iff there is a homomorphism making a commuting diagram. -/
 @[to_additive]
-structure Equiv {E' : Type*} [Group E'] (S' : GroupExtension N E' G) where
-  /-- The homomorphism -/
-  toMonoidHom : E →* E'
+structure Equiv {E' : Type*} [Group E'] (S' : GroupExtension N E' G) extends E →* E' where
   /-- The left-hand side of the diagram commutes. -/
   inl_comm : toMonoidHom.comp S.inl = S'.inl
   /-- The right-hand side of the diagram commutes. -/

@@ -494,18 +494,16 @@ theorem toTwoCocycle_eq_of_equiv
 
 def ofTwoCocycleToTwoCocycleEquiv (S : ofMulDistribMulActionWithSection N G) :
     (ofTwoCocycle (toTwoCocycle S)).Equiv S where
-  toMonoidHom := {
-    toFun := fun ⟨n, g⟩ ↦ S.extension.inl n * S.σ g
-    map_one' := by
-      rw [middleOfTwoCocycle.one_def]
-      simp only [map_inv, inl_toTwoCocycle, mul_one, mul_inv_cancel_right, inv_mul_cancel]
-    map_mul' := by
-      intro ⟨n₁, g₁⟩ ⟨n₂, g₂⟩
-      unfold ofTwoCocycle
-      simp only [map_mul, inl_toTwoCocycle]
-      rw [S.smul_eq_inducedConjAct', Section.inl_inducedConjAct_comm]
-      simp only [← mul_assoc, inv_mul_cancel_right]
-  }
+  toFun := fun ⟨n, g⟩ ↦ S.extension.inl n * S.σ g
+  map_one' := by
+    rw [middleOfTwoCocycle.one_def]
+    simp only [map_inv, inl_toTwoCocycle, mul_one, mul_inv_cancel_right, inv_mul_cancel]
+  map_mul' := by
+    intro ⟨n₁, g₁⟩ ⟨n₂, g₂⟩
+    unfold ofTwoCocycle
+    simp only [map_mul, inl_toTwoCocycle]
+    rw [S.smul_eq_inducedConjAct', Section.inl_inducedConjAct_comm]
+    simp only [← mul_assoc, inv_mul_cancel_right]
   inl_comm := by
     unfold ofTwoCocycle extensionOfTwoCocycle
     ext n
@@ -577,25 +575,23 @@ noncomputable def toofMulDistribMulActionEquivOfTwoCocycleMulInvEq
     (h : ∀ g₁ g₂ : G, Additive.toMul (α := N) (f.val (g₁, g₂)) *
       (Additive.toMul (α := N) (f'.val (g₁, g₂)))⁻¹ = g₁ • x g₂ * (x (g₁ * g₂))⁻¹ * x g₁) :
     (ofTwoCocycle f).toofMulDistribMulAction.Equiv (ofTwoCocycle f').toofMulDistribMulAction where
-  toMonoidHom := {
-    toFun := fun ⟨n, g⟩ ↦ ⟨n * x g, g⟩
-    map_one' := by
-      unfold ofTwoCocycle
-      specialize h 1 1
-      rw [one_smul, one_mul, inv_mul_cancel_right] at h
-      simp only [← h, inv_mul_cancel_left, ← middleOfTwoCocycle.one_def]
-    map_mul' := by
-      intro ⟨n₁, g₁⟩ ⟨n₂, g₂⟩
-      simp only [ofTwoCocycle, middleOfTwoCocycle.mul_def]
-      ext
-      ·
-        rw [mul_right_comm, ← mul_inv_eq_iff_eq_mul]
-        simp only [mul_assoc]
-        rw [h, mul_comm _ (x g₁), mul_comm (x (g₁ * g₂)), mul_assoc, inv_mul_cancel_right,
-          mul_comm (g₁ • n₂), mul_assoc, mul_comm n₂, smul_mul']
-      ·
-        rfl
-  }
+  toFun := fun ⟨n, g⟩ ↦ ⟨n * x g, g⟩
+  map_one' := by
+    unfold ofTwoCocycle
+    specialize h 1 1
+    rw [one_smul, one_mul, inv_mul_cancel_right] at h
+    simp only [← h, inv_mul_cancel_left, ← middleOfTwoCocycle.one_def]
+  map_mul' := by
+    intro ⟨n₁, g₁⟩ ⟨n₂, g₂⟩
+    simp only [ofTwoCocycle, middleOfTwoCocycle.mul_def]
+    ext
+    ·
+      rw [mul_right_comm, ← mul_inv_eq_iff_eq_mul]
+      simp only [mul_assoc]
+      rw [h, mul_comm _ (x g₁), mul_comm (x (g₁ * g₂)), mul_assoc, inv_mul_cancel_right,
+        mul_comm (g₁ • n₂), mul_assoc, mul_comm n₂, smul_mul']
+    ·
+      rfl
   inl_comm := by
     ext n
     specialize h 1 1
