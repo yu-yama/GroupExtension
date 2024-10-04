@@ -26,8 +26,10 @@ For additive groups:
       ↘︎ E' ↗︎️
 ```
 
-- `(Add?)GroupExtension.Splitting S`: structure for splittings of a group extension `S` of `G` by
-  `N` as section homomorphisms `G → E`
+- `(Add?)GroupExtension.Section S`: structure for left-inverses of `rightHom` of a group extension
+  `S` of `G` by `N`
+- `(Add?)GroupExtension.Splitting S`: structure for section homomorphisms of a group extension `S`
+  of `G` by `N`
 - `SemidirectProduct.toGroupExtension φ`: the multiplicative group extension associated to the
   semidirect product coming from `φ : G →* MulAut N`, `1 → N → N ⋊[φ] G → G → 1`
 
@@ -86,12 +88,13 @@ structure Equiv {E' : Type*} [AddGroup E'] (S' : AddGroupExtension N E' G) where
   /-- The right-hand side of the diagram commutes. -/
   rightHom_comm : S'.rightHom.comp toAddMonoidHom = S.rightHom
 
+/-- `Section` of an additive group extension is a left-inverse of `S.rightHom`. -/
+structure Section where
+  toFun : G → E
+  is_section : Function.LeftInverse S.rightHom toFun
+
 /-- `Splitting` of an additive group extension is a section homomorphism. -/
-structure Splitting where
-  /-- A section homomorphism -/
-  sectionHom : G →+ E
-  /-- The section is a left inverse of the projection map. -/
-  rightHom_comp_sectionHom : S.rightHom.comp sectionHom = AddMonoidHom.id G
+structure Splitting extends G →+ E, S.Section
 
 end AddGroupExtension
 
@@ -143,17 +146,43 @@ structure Equiv {E' : Type*} [Group E'] (S' : GroupExtension N E' G) where
   /-- The right-hand side of the diagram commutes. -/
   rightHom_comm : S'.rightHom.comp toMonoidHom = S.rightHom
 
+/-- `Section` of a group extension is a left-inverse of `S.rightHom`. -/
+@[to_additive]
+structure Section where
+  toFun : G → E
+  is_section : Function.LeftInverse S.rightHom toFun
+
+namespace Section
+
+@[to_additive]
+instance : FunLike S.Section G E where
+  coe := toFun
+  coe_injective' := fun ⟨_, _⟩ ⟨_, _⟩ _ ↦ by congr
+
+variable {S}
+
+@[simp]
+theorem coe_mk (σ : G → E) (hσ : Function.LeftInverse S.rightHom σ) : (mk σ hσ : G → E) = σ := rfl
+
+variable (σ : S.Section)
+
+@[simp]
+theorem rightHom_section (g : G) : S.rightHom (σ g) = g := σ.is_section g
+
+@[simp]
+theorem rightHom_comp_section : S.rightHom ∘ σ = id := Function.LeftInverse.comp_eq_id σ.is_section
+
+end Section
+
 /-- `Splitting` of a group extension is a section homomorphism. -/
 @[to_additive]
-structure Splitting where
-  /-- A section homomorphism -/
-  sectionHom : G →* E
-  /-- The section is a left inverse of the projection map. -/
-  rightHom_comp_sectionHom : S.rightHom.comp sectionHom = MonoidHom.id G
+structure Splitting extends G →* E, S.Section
+
+namespace Splitting
 
 @[to_additive]
 instance : FunLike S.Splitting G E where
-  coe s := s.sectionHom
+  coe s := s.toFun
   coe_injective' := by
     intro ⟨_, _⟩ ⟨_, _⟩ h
     congr
@@ -161,16 +190,36 @@ instance : FunLike S.Splitting G E where
 
 @[to_additive]
 instance : MonoidHomClass S.Splitting G E where
-  map_mul s := s.sectionHom.map_mul'
-  map_one s := s.sectionHom.map_one'
+  map_mul s := s.map_mul'
+  map_one s := s.map_one'
+
+variable {S}
+
+@[simp]
+theorem coe_mk (s : G →* E) (hs : Function.LeftInverse S.rightHom s) : (mk s hs : G → E) = s := rfl
+
+@[simp]
+theorem coe_monoidHom_mk (s : G →* E) (hs : Function.LeftInverse S.rightHom s) :
+    (mk s hs : G →* E) = s := rfl
+
+variable (s : S.Splitting)
+
+@[simp]
+theorem rightHom_splitting (g : G) : S.rightHom (s g) = g := s.is_section g
+
+@[simp]
+theorem rightHom_comp_splitting : S.rightHom.comp s = MonoidHom.id G := by
+  ext g
+  simp only [MonoidHom.comp_apply, MonoidHom.id_apply, MonoidHom.coe_coe, rightHom_splitting]
+
+end Splitting
 
 /-- A splitting of an extension `S` is `N`-conjugate to another iff there exists `n : N` such that
 the section homomorphism is a conjugate of the other section homomorphism by `S.inl n`. -/
 @[to_additive
       "A splitting of an extension `S` is `N`-conjugate to another iff there exists `n : N` such
       that the section homomorphism is a conjugate of the other section homomorphism by `S.inl n`."]
-def IsConj (S : GroupExtension N E G) (s s' : S.Splitting) : Prop :=
-  ∃ n : N, s.sectionHom = fun g ↦ S.inl n * s'.sectionHom g * (S.inl n)⁻¹
+def IsConj (s s' : S.Splitting) : Prop := ∃ n : N, s = fun g ↦ S.inl n * s' g * (S.inl n)⁻¹
 
 end GroupExtension
 
@@ -190,8 +239,9 @@ theorem toGroupExtension_rightHom : (toGroupExtension φ).rightHom = SemidirectP
   rfl
 
 /-- A canonical splitting of the group extension associated to the semidirect product -/
-def inr_splitting : (toGroupExtension φ).Splitting where
-  sectionHom := inr
-  rightHom_comp_sectionHom := rightHom_comp_inr
+def inr_splitting : (toGroupExtension φ).Splitting := {
+  inr with
+  is_section := rightHom_inr
+}
 
 end SemidirectProduct

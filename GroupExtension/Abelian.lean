@@ -23,34 +23,32 @@ noncomputable def toRep (φ : G →* MulAut N) : Rep ℤ G :=
 /-- Turns a splitting into the corresponding 1-cocyle. -/
 def splitting_toOneCocycle (s : (toGroupExtension φ).Splitting) :
     groupCohomology.oneCocycles (toRep φ) where
-  val := fun g ↦ Additive.ofMul (α := N) (s.sectionHom g).left
+  val := fun g ↦ Additive.ofMul (α := N) (s g).left
   property := by
     rw [groupCohomology.mem_oneCocycles_iff (A := toRep φ)]
     intro g₁ g₂
     unfold toRep
     rw [Rep.ofMulDistribMulAction_ρ_apply_apply, map_mul, mul_left, mul_comm, ← ofMul_mul]
     congr
-    exact right_sectionHom s g₁
+    exact right_splitting s g₁
 
 /-- Turns a 1-cocycle into the corresponding splitting. -/
 def splitting_ofOneCocycle (f : groupCohomology.oneCocycles (toRep φ)) :
     (toGroupExtension φ).Splitting where
-  sectionHom := {
-    toFun := fun g ↦ ⟨Additive.toMul (f.val g), g⟩
-    map_one' := by
-      simp only [groupCohomology.oneCocycles_map_one, toMul_zero]
-      rfl
-    map_mul' := by
-      unfold toRep at f
-      intro g₁ g₂
-      dsimp only
-      rw [(groupCohomology.mem_oneCocycles_iff f.val).mp f.property g₁ g₂, toMul_add, mul_comm,
-        Rep.ofMulDistribMulAction_ρ_apply_apply, toMul_ofMul]
-      rfl
-  }
-  rightHom_comp_sectionHom := by
-    ext g
+  toFun := fun g ↦ ⟨Additive.toMul (f.val g), g⟩
+  map_one' := by
+    simp only [groupCohomology.oneCocycles_map_one, toMul_zero]
     rfl
+  map_mul' := by
+    unfold toRep at f
+    intro g₁ g₂
+    dsimp only
+    rw [(groupCohomology.mem_oneCocycles_iff f.val).mp f.property g₁ g₂, toMul_add, mul_comm,
+      Rep.ofMulDistribMulAction_ρ_apply_apply, toMul_ofMul]
+    rfl
+  is_section := by
+    intro g
+    simp only [toGroupExtension_rightHom, rightHom_eq_right]
 
 /-- A bijection between the splittings and the 1-cocycles -/
 def splitting_equiv_oneCocycles :
@@ -63,14 +61,13 @@ def splitting_equiv_oneCocycles :
     congr
     ext g
     <;> congr
-    <;> exact (s.rightHom_sectionHom g).symm
+    <;> exact (s.rightHom_splitting g).symm
   right_inv := by
     intro f
     unfold splitting_toOneCocycle splitting_ofOneCocycle
     ext g
-    simp only [mk_eq_inl_mul_inr, MonoidHom.coe_mk, OneHom.coe_mk, mul_left, left_inl, right_inl,
-      map_one, left_inr, mul_one]
-    rfl
+    simp only [mk_eq_inl_mul_inr, GroupExtension.Splitting.coe_mk, MonoidHom.coe_mk, OneHom.coe_mk,
+      mul_left, left_inl, right_inl, map_one, left_inr, mul_one, ofMul_toMul]
 
 /-- Two splittings are `N`-conjugates iff the difference of the corresponding 1-cocycles is a
     1-coboundary. -/
@@ -90,7 +87,7 @@ theorem isConj_iff_sub_mem_oneCoboundaries (s₁ s₂ : (toGroupExtension φ).Sp
   rw [show ((toRep φ).ρ g) n = Additive.ofMul (φ g n) by rfl, sub_eq_iff_eq_add, ← ofMul_div,
     ← ofMul_mul, Additive.ofMul.apply_eq_iff_eq, SemidirectProduct.ext_iff]
   simp only [mul_left, mul_right, inv_left, toGroupExtension_inl, left_inl, right_inl,
-    map_one, one_mul, inv_one, MulAut.one_apply, right_sectionHom, map_inv, div_eq_mul_inv,
+    map_one, one_mul, inv_one, MulAut.one_apply, right_splitting, map_inv, div_eq_mul_inv,
     mul_right_comm]
   apply and_iff_left
   rw [← rightHom_eq_right, map_inv, rightHom_inl, inv_one, mul_one]

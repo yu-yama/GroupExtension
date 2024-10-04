@@ -34,12 +34,6 @@ theorem rightHom_eq_iff_exists_inl_mul {e e' : E} :
   rw [← mul_inv_eq_one, ← map_inv, ← map_mul, ← MonoidHom.mem_ker, ← S.range_inl_eq_ker_rightHom]
   exact exists_congr fun _ ↦ eq_mul_inv_iff_mul_eq
 
--- TODO: move `Section` to `Defs.lean`, define `Splitting` with `extends S.Section, G →* E`, and
--- refactor `Splitting` lemmas
-structure Section where
-  toFun : G → E
-  is_section : Function.LeftInverse S.rightHom toFun
-
 noncomputable def surjInvRightHom : S.Section := {
   toFun := Function.surjInv S.rightHom_surjective
   is_section := Function.surjInv_eq S.rightHom_surjective
@@ -49,23 +43,9 @@ namespace Section
 
 variable {S}
 
-instance : FunLike S.Section G E where
-  coe := Section.toFun
-  coe_injective' := fun ⟨_, _⟩ ⟨_, _⟩ _ ↦ by congr
-
-@[simp]
-theorem coe_mk (s : G → E) (hs : Function.LeftInverse S.rightHom s) :
-    (GroupExtension.Section.mk s hs : G → E) = s := rfl
-
 section
 
 variable (σ : S.Section)
-
-@[simp]
-theorem rightHom_section (g : G) : S.rightHom (σ g) = g := σ.is_section g
-
-@[simp]
-theorem rightHom_comp_section : S.rightHom ∘ σ = id := Function.LeftInverse.comp_eq_id σ.is_section
 
 section
 
@@ -222,18 +202,15 @@ namespace Splitting
 variable {S}
 variable (s : S.Splitting)
 
-theorem rightHom_sectionHom (g : G) : S.rightHom (s.sectionHom g) = g := by
-  rw [← MonoidHom.comp_apply, s.rightHom_comp_sectionHom, MonoidHom.id_apply]
-
 /-- `G` acts on `N` by conjugation -/
-noncomputable def conjAct : G →* MulAut N := S.conjAct.comp s.sectionHom
+noncomputable def conjAct : G →* MulAut N := S.conjAct.comp s
 
 /-- A group homomorphism from the corresponding semidirect product -/
 def monoidHom_semidirectProduct : N ⋊[s.conjAct] G →* E where
-  toFun := fun ⟨n, g⟩ ↦ S.inl n * s.sectionHom g
+  toFun := fun ⟨n, g⟩ ↦ S.inl n * s g
   map_one' := by simp only [map_one, mul_one]
   map_mul' := fun ⟨n₁, g₁⟩ ⟨n₂, g₂⟩ ↦ by
-    simp only [conjAct, MonoidHom.comp_apply, map_mul, inl_conjAct_comm]
+    simp only [conjAct, MonoidHom.comp_apply, map_mul, inl_conjAct_comm, MonoidHom.coe_coe]
     group
 
 /-- A split group extension is equivalent to a canonical extension giving a semidirect product. -/
@@ -248,7 +225,7 @@ def equiv_semidirectProduct : (SemidirectProduct.toGroupExtension s.conjAct).Equ
     ext ⟨n, g⟩
     simp only [SemidirectProduct.toGroupExtension, MonoidHom.comp_apply,
       SemidirectProduct.rightHom_eq_right, monoidHom_semidirectProduct, MonoidHom.coe_mk,
-      OneHom.coe_mk, map_mul, rightHom_inl, rightHom_sectionHom, one_mul]
+      OneHom.coe_mk, map_mul, rightHom_inl, rightHom_splitting, one_mul]
 
 /-- A group given by a split extension is isomorphic to a semidirect product -/
 noncomputable def mulEquiv_semidirectProduct : N ⋊[s.conjAct] G ≃* E :=
@@ -294,7 +271,7 @@ namespace SemidirectProduct
 
 variable {φ : G →* MulAut N} (s : (toGroupExtension φ).Splitting)
 
-theorem right_sectionHom (g : G) : (s.sectionHom g).right = g := by
-  rw [← rightHom_eq_right, ← toGroupExtension_rightHom, s.rightHom_sectionHom]
+theorem right_splitting (g : G) : (s g).right = g := by
+  rw [← rightHom_eq_right, ← toGroupExtension_rightHom, s.rightHom_splitting]
 
 end SemidirectProduct
