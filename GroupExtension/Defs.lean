@@ -106,7 +106,7 @@ theorem rightHom_comp_inl : S.rightHom.comp S.inl = 1 := by
   rw [MonoidHom.one_apply, MonoidHom.comp_apply]
   exact S.rightHom_inl n
 
--- TODO: does Mathlib have any definition to compose this homomorphism using more concisely?
+-- TODO: does Mathlib have any definition to compose this homomorphism more concisely?
 /-- `E` acts on `N` by conjugation. -/
 noncomputable def conjAct : E →* MulAut N where
   toFun e := (MonoidHom.ofInjective S.inl_injective).trans <|
