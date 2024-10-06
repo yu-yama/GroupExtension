@@ -157,15 +157,15 @@ instance : FunLike S.Section G E where
 
 variable {S}
 
-@[simp]
+@[to_additive (attr := simp)]
 theorem coe_mk (σ : G → E) (hσ : Function.LeftInverse S.rightHom σ) : (mk σ hσ : G → E) = σ := rfl
 
 variable (σ : S.Section)
 
-@[simp]
+@[to_additive (attr := simp)]
 theorem rightHom_section (g : G) : S.rightHom (σ g) = g := σ.is_section g
 
-@[simp]
+@[to_additive (attr := simp)]
 theorem rightHom_comp_section : S.rightHom ∘ σ = id := Function.LeftInverse.comp_eq_id σ.is_section
 
 end Section
@@ -191,19 +191,19 @@ instance : MonoidHomClass S.Splitting G E where
 
 variable {S}
 
-@[simp]
+@[to_additive (attr := simp)]
 theorem coe_mk (s : G →* E) (hs : Function.LeftInverse S.rightHom s) : (mk s hs : G → E) = s := rfl
 
-@[simp]
+@[to_additive (attr := simp)]
 theorem coe_monoidHom_mk (s : G →* E) (hs : Function.LeftInverse S.rightHom s) :
     (mk s hs : G →* E) = s := rfl
 
 variable (s : S.Splitting)
 
-@[simp]
+@[to_additive (attr := simp)]
 theorem rightHom_splitting (g : G) : S.rightHom (s g) = g := s.is_section g
 
-@[simp]
+@[to_additive (attr := simp)]
 theorem rightHom_comp_splitting : S.rightHom.comp s = MonoidHom.id G := by
   ext g
   simp only [MonoidHom.comp_apply, MonoidHom.id_apply, MonoidHom.coe_coe, rightHom_splitting]
