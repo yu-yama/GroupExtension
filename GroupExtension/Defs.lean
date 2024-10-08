@@ -26,7 +26,7 @@ For additive groups:
       ↘︎ E' ↗︎️
 ```
 
-- `(Add?)GroupExtension.Section S`: structure for left-inverses of `rightHom` of a group extension
+- `(Add?)GroupExtension.Section S`: structure for right inverses to `rightHom` of a group extension
   `S` of `G` by `N`
 - `(Add?)GroupExtension.Splitting S`: structure for section homomorphisms of a group extension `S`
   of `G` by `N`
@@ -76,10 +76,10 @@ structure Equiv {E' : Type*} [AddGroup E'] (S' : AddGroupExtension N E' G) exten
   /-- The right-hand side of the diagram commutes. -/
   rightHom_comm : S'.rightHom.comp toAddMonoidHom = S.rightHom
 
-/-- `Section` of an additive group extension is a left-inverse of `S.rightHom`. -/
+/-- `Section` of an additive group extension is a right inverse to `S.rightHom`. -/
 structure Section where
   toFun : G → E
-  is_section : Function.LeftInverse S.rightHom toFun
+  rightInverse_rightHom : Function.RightInverse toFun S.rightHom
 
 /-- `Splitting` of an additive group extension is a section homomorphism. -/
 structure Splitting extends G →+ E, S.Section
@@ -132,11 +132,11 @@ structure Equiv {E' : Type*} [Group E'] (S' : GroupExtension N E' G) extends E �
   /-- The right-hand side of the diagram commutes. -/
   rightHom_comm : S'.rightHom.comp toMonoidHom = S.rightHom
 
-/-- `Section` of a group extension is a left-inverse of `S.rightHom`. -/
+/-- `Section` of a group extension is a right inverse to `S.rightHom`. -/
 @[to_additive]
 structure Section where
   toFun : G → E
-  is_section : Function.LeftInverse S.rightHom toFun
+  rightInverse_rightHom : Function.RightInverse toFun S.rightHom
 
 namespace Section
 
@@ -148,15 +148,15 @@ instance : FunLike S.Section G E where
 variable {S}
 
 @[to_additive (attr := simp)]
-theorem coe_mk (σ : G → E) (hσ : Function.LeftInverse S.rightHom σ) : (mk σ hσ : G → E) = σ := rfl
+theorem coe_mk (σ : G → E) (hσ : Function.RightInverse σ S.rightHom) : (mk σ hσ : G → E) = σ := rfl
 
 variable (σ : S.Section)
 
 @[to_additive (attr := simp)]
-theorem rightHom_section (g : G) : S.rightHom (σ g) = g := σ.is_section g
+theorem rightHom_section (g : G) : S.rightHom (σ g) = g := σ.rightInverse_rightHom g
 
 @[to_additive (attr := simp)]
-theorem rightHom_comp_section : S.rightHom ∘ σ = id := Function.LeftInverse.comp_eq_id σ.is_section
+theorem rightHom_comp_section : S.rightHom ∘ σ = id := Function.RightInverse.comp_eq_id σ.rightInverse_rightHom
 
 end Section
 
@@ -182,16 +182,16 @@ instance : MonoidHomClass S.Splitting G E where
 variable {S}
 
 @[to_additive (attr := simp)]
-theorem coe_mk (s : G →* E) (hs : Function.LeftInverse S.rightHom s) : (mk s hs : G → E) = s := rfl
+theorem coe_mk (s : G →* E) (hs : Function.RightInverse s S.rightHom) : (mk s hs : G → E) = s := rfl
 
 @[to_additive (attr := simp)]
-theorem coe_monoidHom_mk (s : G →* E) (hs : Function.LeftInverse S.rightHom s) :
+theorem coe_monoidHom_mk (s : G →* E) (hs : Function.RightInverse s S.rightHom) :
     (mk s hs : G →* E) = s := rfl
 
 variable (s : S.Splitting)
 
 @[to_additive (attr := simp)]
-theorem rightHom_splitting (g : G) : S.rightHom (s g) = g := s.is_section g
+theorem rightHom_splitting (g : G) : S.rightHom (s g) = g := s.rightInverse_rightHom g
 
 @[to_additive (attr := simp)]
 theorem rightHom_comp_splitting : S.rightHom.comp s = MonoidHom.id G := by
@@ -227,7 +227,7 @@ theorem toGroupExtension_rightHom : (toGroupExtension φ).rightHom = SemidirectP
 /-- A canonical splitting of the group extension associated to the semidirect product -/
 def inr_splitting : (toGroupExtension φ).Splitting := {
   inr with
-  is_section := rightHom_inr
+  rightInverse_rightHom := rightHom_inr
 }
 
 end SemidirectProduct

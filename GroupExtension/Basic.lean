@@ -42,7 +42,7 @@ theorem rightHom_eq_iff_exists_inl_mul {e e' : E} :
 @[to_additive]
 noncomputable def surjInvRightHom : S.Section := {
   toFun := Function.surjInv S.rightHom_surjective
-  is_section := Function.surjInv_eq S.rightHom_surjective
+  rightInverse_rightHom := Function.surjInv_eq S.rightHom_surjective
 }
 
 namespace Section
@@ -129,7 +129,7 @@ variable {E' : Type*} [Group E'] {S' : GroupExtension N E' G} (σ : S.Section) (
 @[to_additive]
 def ofEquiv : S'.Section where
   toFun := equiv.toMonoidHom ∘ σ
-  is_section g := by
+  rightInverse_rightHom g := by
     rw [Function.comp_apply, ← MonoidHom.comp_apply, equiv.rightHom_comm, rightHom_section]
 
 @[to_additive]

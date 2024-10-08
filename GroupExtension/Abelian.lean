@@ -46,7 +46,7 @@ def splitting_ofOneCocycle (f : groupCohomology.oneCocycles (toRep φ)) :
     rw [(groupCohomology.mem_oneCocycles_iff f.val).mp f.property g₁ g₂, toMul_add, mul_comm,
       Rep.ofMulDistribMulAction_ρ_apply_apply, toMul_ofMul]
     rfl
-  is_section := by
+  rightInverse_rightHom := by
     intro g
     simp only [toGroupExtension_rightHom, rightHom_eq_right]
 
@@ -444,7 +444,7 @@ theorem extensionOfTwoCocycle_rightHom :
 
 def sectionOfTwoCocycle : (extensionOfTwoCocycle f).Section where
   toFun := fun g ↦ ⟨1, g⟩
-  is_section := by
+  rightInverse_rightHom := by
       intro _
       simp only [extensionOfTwoCocycle_rightHom, middleOfTwoCocycle.rightHom_eq_right]
 
@@ -561,7 +561,7 @@ theorem sub_mem_twoCoboundaries_of_toofMulDistribMulAction_equiv
   have := DFunLike.congr_arg S'.extension.inl <|
     MulEquiv.ext_iff.mp (MonoidHom.ext_iff.mp (S'.σ.inducedConjAct_eq {
       toFun := fun g ↦ (S.σ.ofEquiv equiv g₁)⁻¹ * S'.σ (g₁ * g)
-      is_section := by
+      rightInverse_rightHom := by
         intro g
         simp only [map_mul, map_inv, Section.rightHom_section, inv_mul_cancel_left]
     }) g₂) (Function.invFun S'.extension.inl ((S.σ.ofEquiv equiv (g₁ * g₂))⁻¹ * S'.σ (g₁ * g₂)))
