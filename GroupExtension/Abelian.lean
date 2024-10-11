@@ -16,11 +16,11 @@ namespace SemidirectProduct
 
 variable {N G : Type} [CommGroup N] [Group G] (φ : G →* MulAut N)
 
-/-- The category of `ℤ`-linear `G`-representation with `φ` being the multiplicative action -/
+/-- The `ℤ`-linear `G`-representation associated to the given multiplicative action -/
 noncomputable def toRep (φ : G →* MulAut N) : Rep ℤ G :=
   @Rep.ofMulDistribMulAction G N _ _ (MulDistribMulAction.compHom N φ)
 
-/-- Turns a splitting into the corresponding 1-cocyle. -/
+/-- Returns the 1-cocycle corresponding to a splitting. -/
 def splitting_toOneCocycle (s : (toGroupExtension φ).Splitting) :
     groupCohomology.oneCocycles (toRep φ) where
   val := fun g ↦ Additive.ofMul (α := N) (s g).left
@@ -32,7 +32,7 @@ def splitting_toOneCocycle (s : (toGroupExtension φ).Splitting) :
     congr
     exact right_splitting s g₁
 
-/-- Turns a 1-cocycle into the corresponding splitting. -/
+/-- Returns the splitting corresponding to a 1-cocycle. -/
 def splitting_ofOneCocycle (f : groupCohomology.oneCocycles (toRep φ)) :
     (toGroupExtension φ).Splitting where
   toFun := fun g ↦ ⟨Additive.toMul (f.val g), g⟩
@@ -50,7 +50,8 @@ def splitting_ofOneCocycle (f : groupCohomology.oneCocycles (toRep φ)) :
     intro g
     simp only [toGroupExtension_rightHom, rightHom_eq_right]
 
-/-- A bijection between the splittings and the 1-cocycles -/
+/-- The bijection between the splittings of the group extension associated to a semidirect product
+  and the 1-cocycles -/
 def splitting_equiv_oneCocycles :
     (toGroupExtension φ).Splitting ≃ groupCohomology.oneCocycles (toRep φ) where
   toFun := splitting_toOneCocycle φ
@@ -70,7 +71,7 @@ def splitting_equiv_oneCocycles :
       mul_left, left_inl, right_inl, map_one, left_inr, mul_one, ofMul_toMul]
 
 /-- Two splittings are `N`-conjugates iff the difference of the corresponding 1-cocycles is a
-    1-coboundary. -/
+  1-coboundary. -/
 theorem isConj_iff_sub_mem_oneCoboundaries (s₁ s₂ : (toGroupExtension φ).Splitting) :
     (toGroupExtension φ).IsConj s₁ s₂ ↔
     splitting_toOneCocycle φ s₁ - splitting_toOneCocycle φ s₂ ∈
@@ -92,7 +93,7 @@ theorem isConj_iff_sub_mem_oneCoboundaries (s₁ s₂ : (toGroupExtension φ).Sp
   apply and_iff_left
   rw [← rightHom_eq_right, map_inv, rightHom_inl, inv_one, mul_one]
 
-/-- A bijection between the `N`-conjugacy classes of splittings and `H1` -/
+/-- The bijection between the `N`-conjugacy classes of splittings and the first cohomology group -/
 def conjClasses_equiv_h1 : (toGroupExtension φ).ConjClasses ≃ groupCohomology.H1 (toRep φ) :=
   Quotient.congr (splitting_equiv_oneCocycles φ) (by
     intro s₁ s₂
@@ -117,7 +118,7 @@ theorem conjAct_inl (n : N) : S.conjAct (S.inl n) = 1 := by
 theorem inl_range_le_conjAct_ker : S.inl.range ≤ S.conjAct.ker :=
   fun _ ⟨n, hn⟩ ↦ hn ▸ S.conjAct_inl n
 
-/-- Terms of `E` acts on `N` in the same way if their values by `rightHom` coincide. -/
+/-- `E` acts on `N` in the same way if their values by `rightHom` coincide. -/
 theorem conjAct_eq_of_rightHom_eq {e e' : E} (h : S.rightHom e = S.rightHom e') :
     S.conjAct e = S.conjAct e' := by
   obtain ⟨_, rfl⟩ := S.rightHom_eq_iff_exists_inl_mul.mp h
@@ -646,6 +647,7 @@ theorem exists_twoCocycle_mul_inv_eq_of_sub_mem_twoCoboundaries
   rw [Rep.ofMulDistribMulAction_ρ_apply_apply, toMul_sub, toMul_ofMul] at hx
   simp only [← div_eq_mul_inv, hx]
 
+/-- The bijection between the equivalence classes of extensions and `groupCohomology.H2` -/
 noncomputable def equivH2 :
     EquivClasses N G ≃ groupCohomology.H2 (Rep.ofMulDistribMulAction G N) where
   toFun := Quotient.lift toH2 fun _ _ ⟨equiv⟩ ↦ (Quotient.eq (r := Submodule.quotientRel _)).mpr <|
@@ -671,7 +673,8 @@ noncomputable def equivH2 :
       instHasEquivOfSetoid, Submodule.quotientRel_r_def]
     simpa only [ofMulDistribMulActionWithSection.toTwoCocycle_ofTwoCocycle] using
       ofMulDistribMulActionWithSection.sub_mem_twoCoboundaries_of_toofMulDistribMulAction_equiv
-      (Equiv.refl (ofMulDistribMulActionWithSection.ofTwoCocycle f).toofMulDistribMulAction.extension)
+      (Equiv.refl
+        (ofMulDistribMulActionWithSection.ofTwoCocycle f).toofMulDistribMulAction.extension)
       (S := {
         (ofMulDistribMulActionWithSection.ofTwoCocycle f).toofMulDistribMulAction with
         σ := (ofMulDistribMulActionWithSection.ofTwoCocycle f).extension.surjInvRightHom

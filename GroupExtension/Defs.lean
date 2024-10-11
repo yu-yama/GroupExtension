@@ -79,6 +79,7 @@ structure Equiv {E' : Type*} [AddGroup E'] (S' : AddGroupExtension N E' G) exten
 /-- `Section` of an additive group extension is a right inverse to `S.rightHom`. -/
 structure Section where
   toFun : G → E
+  /-- `Section` is a right inverse to `S.rightHom` -/
   rightInverse_rightHom : Function.RightInverse toFun S.rightHom
 
 /-- `Splitting` of an additive group extension is a section homomorphism. -/
@@ -136,6 +137,7 @@ structure Equiv {E' : Type*} [Group E'] (S' : GroupExtension N E' G) extends E �
 @[to_additive]
 structure Section where
   toFun : G → E
+  /-- `Section` is a right inverse to `S.rightHom` -/
   rightInverse_rightHom : Function.RightInverse toFun S.rightHom
 
 namespace Section
