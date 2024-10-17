@@ -8,7 +8,7 @@ import Mathlib.Tactic.Group
 
 This file gives basic lemmas about group extensions.
 
-For the main definitions, see `GroupTheory/GroupExtension/Defs.lean`.
+For the main definitions, see `Mathlib/GroupTheory/GroupExtension/Defs.lean`.
 -/
 
 variable {N G : Type*} [Group N] [Group G]
@@ -122,8 +122,9 @@ section
 
 variable {E' : Type*} [Group E'] {S' : GroupExtension N E' G} (σ : S.Section) (equiv : S.Equiv S')
 
-/-- The composition of an equivalence of group extensions and a section -/
-@[to_additive "The composition of an equivalence of group extensions and a section"]
+/-- The composition of a homomorphism between equivalence group extensions and a section -/
+@[to_additive "The composition of a homomorphism between equivalent additive group extensions and a
+  section"]
 def ofEquiv : S'.Section where
   toFun := equiv.toMonoidHom ∘ σ
   rightInverse_rightHom g := by
@@ -262,7 +263,7 @@ def equiv_semidirectProduct : (SemidirectProduct.toGroupExtension s.conjAct).Equ
       SemidirectProduct.rightHom_eq_right, monoidHom_semidirectProduct, MonoidHom.coe_mk,
       OneHom.coe_mk, map_mul, rightHom_inl, rightHom_splitting, one_mul]
 
-/-- A group given by a split extension is isomorphic to a semidirect product. -/
+/-- The group associated to a split extension is isomorphic to a semidirect product. -/
 noncomputable def mulEquiv_semidirectProduct : N ⋊[s.conjAct] G ≃* E :=
   s.equiv_semidirectProduct.toMulEquiv
 
