@@ -1,5 +1,4 @@
 import GroupExtension.Basic
-import GroupExtension.Deps.Quotient
 import GroupExtension.Deps.LowDegree
 import Mathlib.RepresentationTheory.GroupCohomology.LowDegree
 
