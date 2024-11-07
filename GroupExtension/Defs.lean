@@ -122,8 +122,7 @@ noncomputable def conjAct : E →* MulAut N where
 /-- The inclusion and a conjugation commute. -/
 theorem inl_conjAct_comm {e : E} {n : N} : S.inl (S.conjAct e n) = e * S.inl n * e⁻¹ := by
   simp only [conjAct, MonoidHom.coe_mk, OneHom.coe_mk, MulEquiv.trans_apply,
-    MonoidHom.apply_ofInjective_symm]
-  rfl
+    MonoidHom.apply_ofInjective_symm, MulAut.conjNormal_apply, MonoidHom.ofInjective_apply]
 
 /-- `GroupExtension`s are equivalent iff there is a homomorphism making a commuting diagram. -/
 @[to_additive]
