@@ -28,12 +28,6 @@ noncomputable def quotientRangeInlEquivRight : E ⧸ S.inl.range ≃* G :=
   (QuotientGroup.quotientMulEquivOfEq S.range_inl_eq_ker_rightHom).trans
     S.quotientKerRightHomEquivRight
 
-@[to_additive]
-theorem rightHom_eq_iff_exists_inl_mul {e e' : E} :
-    S.rightHom e = S.rightHom e' ↔ ∃ n : N, S.inl n * e' = e := by
-  rw [← mul_inv_eq_one, ← map_inv, ← map_mul, ← MonoidHom.mem_ker, ← S.range_inl_eq_ker_rightHom]
-  exact exists_congr fun _ ↦ eq_mul_inv_iff_mul_eq
-
 /-- The inverse of the surjective `rightHom` -/
 @[to_additive surjInvRightHom "The inverse of the surjective `rightHom`." ]
 noncomputable def surjInvRightHom : S.Section := {
@@ -90,28 +84,16 @@ theorem section_mul_inv_mul_mul_mem_range : (σ (g₁ * g₂))⁻¹ * σ g₁ * 
   simp only [map_mul, map_inv, rightHom_section, mul_assoc, inv_mul_cancel]
 
 @[to_additive]
-theorem exists_inl_mul_section_mul : ∃ n : N, S.inl n * σ (g₁ * g₂) = σ g₁ * σ g₂ := by
+theorem exists_section_mul_eq_inl_mul : ∃ n : N, σ (g₁ * g₂) = S.inl n * σ g₁ * σ g₂ := by
   obtain ⟨n, hn⟩ := section_mul_mul_mul_inv_mem_range σ g₁ g₂
-  exact ⟨n, hn ▸ inv_mul_cancel_right _ _⟩
-
-@[to_additive]
-theorem exists_section_mul : ∃ n : N, σ (g₁ * g₂) = S.inl n * σ g₁ * σ g₂ := by
-  obtain ⟨n, hn⟩ := exists_inl_mul_section_mul σ g₁ g₂
   use n⁻¹
-  rw [mul_assoc, map_inv, eq_inv_mul_iff_mul_eq, hn]
+  rw [mul_assoc, map_inv, eq_inv_mul_iff_mul_eq, ← eq_mul_inv_iff_mul_eq, hn]
 
 @[to_additive]
-theorem exists_section_mul_mul_inl : ∃ n : N, σ (g₁ * g₂) * S.inl n = σ g₁ * σ g₂ := by
+theorem exists_section_mul_eq_mul_inl : ∃ n : N, σ (g₁ * g₂) = σ g₁ * σ g₂ * S.inl n := by
   obtain ⟨n, hn⟩ := section_mul_inv_mul_mul_mem_range σ g₁ g₂
-  use n
-  rw [hn, mul_assoc, mul_inv_cancel_left]
-
-@[to_additive]
-theorem exists_section_mul' : ∃ n : N, σ (g₁ * g₂) = σ g₁ * σ g₂ * S.inl n := by
-  obtain ⟨n, hn⟩ := exists_section_mul_mul_inl σ g₁ g₂
   use n⁻¹
-  rw [map_inv, eq_mul_inv_iff_mul_eq]
-  exact hn
+  rw [map_inv, eq_mul_inv_iff_mul_eq, ← eq_inv_mul_iff_mul_eq, ← mul_assoc, hn]
 
 end
 
@@ -131,24 +113,6 @@ def ofEquiv : S'.Section where
 
 @[to_additive]
 theorem ofEquiv_def (g : G) : σ.ofEquiv equiv g = equiv.toMonoidHom (σ g) := rfl
-
-variable (σ' : S'.Section) (g : G)
-
-@[to_additive]
-theorem equiv_mul_inv_mem_range : equiv.toMonoidHom (σ g) * (σ' g)⁻¹ ∈ S'.inl.range :=
-  section_mul_inv_mem_range (σ.ofEquiv equiv) σ' g
-
-@[to_additive]
-theorem mul_inv_equiv_mem_range : σ' g * (equiv.toMonoidHom (σ g))⁻¹ ∈ S'.inl.range :=
-  section_mul_inv_mem_range σ' (σ.ofEquiv equiv) g
-
-@[to_additive]
-theorem inv_equiv_mul_mem_range : (equiv.toMonoidHom (σ g))⁻¹ * σ' g ∈ S'.inl.range :=
-  section_inv_mul_mem_range (σ.ofEquiv equiv) σ' g
-
-@[to_additive]
-theorem inv_mul_equiv_mem_range : (σ' g)⁻¹ * equiv.toMonoidHom (σ g) ∈ S'.inl.range :=
-  section_inv_mul_mem_range σ' (σ.ofEquiv equiv) g
 
 end
 

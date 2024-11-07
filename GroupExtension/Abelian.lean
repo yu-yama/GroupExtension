@@ -118,16 +118,6 @@ theorem conjAct_inl (n : N) : S.conjAct (S.inl n) = 1 := by
   rw [MulAut.one_apply, inl_conjAct_comm]
   simp only [← map_inv, ← map_mul, mul_inv_cancel_comm]
 
-/-- The range of `inl` is a subgroup of the kernel of the action by conjugation. -/
-theorem range_inl_le_ker_conjAct : S.inl.range ≤ S.conjAct.ker :=
-  fun _ ⟨n, hn⟩ ↦ hn ▸ S.conjAct_inl n
-
-/-- Two terms of `E` act on `N` in the same way if their values by `rightHom` coincide. -/
-theorem conjAct_eq_of_rightHom_eq {e e' : E} (h : S.rightHom e = S.rightHom e') :
-    S.conjAct e = S.conjAct e' := by
-  obtain ⟨_, rfl⟩ := S.rightHom_eq_iff_exists_inl_mul.mp h
-  rw [map_mul, conjAct_inl, one_mul]
-
 namespace Section
 
 variable {S}
@@ -144,7 +134,7 @@ noncomputable def conjAct : G →* MulAut N where
     ext n
     apply S.inl_injective
     simp only [MulAut.mul_apply, inl_conjAct_comm]
-    obtain ⟨n', hn'⟩ := exists_section_mul' σ g₁ g₂
+    obtain ⟨n', hn'⟩ := exists_section_mul_eq_mul_inl σ g₁ g₂
     rw [hn', mul_assoc _ (S.inl n'), ← S.inl.map_mul, mul_comm, map_mul]
     group
 
@@ -152,8 +142,8 @@ noncomputable def conjAct : G →* MulAut N where
 theorem conjAct_eq (σ' : S.Section) : σ.conjAct = σ'.conjAct := by
   ext1 g
   simp only [conjAct, MonoidHom.coe_mk, OneHom.coe_mk]
-  apply conjAct_eq_of_rightHom_eq
-  simp only [rightHom_section]
+  obtain ⟨n, hn⟩ := σ.exists_inl_mul_section σ' g
+  simp only [hn, map_mul, conjAct_inl, one_mul]
 
 /-- The inclusion and a conjugation commute. -/
 theorem inl_conjAct_comm {g : G} {n : N} :
@@ -567,8 +557,8 @@ theorem sub_mem_twoCoboundaries_of_toofMulDistribMulAction_equiv
     groupCohomology.twoCocycles.val_eq_coe]
   rw [toMul_add, toMul_sub, toMul_sub] -- does not work with `simp`
   apply S'.extension.inl_injective
-  simp only [div_eq_mul_inv, toMul_ofMul, map_mul, map_inv, inl_toTwoCocycle, S.σ.ofEquiv_def,
-    Function.invFun_eq (S.σ.equiv_mul_inv_mem_range equiv S'.σ _), S'.smul_eq_conjAct,
+  simp only [div_eq_mul_inv, toMul_ofMul, map_mul, map_inv, inl_toTwoCocycle,
+    Function.invFun_eq ((S.σ.ofEquiv equiv).section_mul_inv_mem_range S'.σ _), S'.smul_eq_conjAct,
     Section.inl_conjAct_comm]
   rw [← equiv.inl_comm, MonoidHom.comp_apply, inl_toTwoCocycle]
   simp only [map_mul, map_inv, mul_inv_rev, inv_inv, ← mul_assoc, ← Section.ofEquiv_def]
@@ -578,8 +568,8 @@ theorem sub_mem_twoCoboundaries_of_toofMulDistribMulAction_equiv
   have h : (S.σ.ofEquiv equiv g₂) * (S.σ.ofEquiv equiv (g₁ * g₂))⁻¹ * S'.σ (g₁ * g₂) *
       (S'.σ g₂)⁻¹ ∈ S'.extension.inl.range := by
     simp only [S'.extension.range_inl_eq_ker_rightHom, MonoidHom.mem_ker, map_mul, map_inv,
-      ← Section.ofEquiv_def, Section.rightHom_section, mul_inv_rev, mul_inv_cancel_left,
-      inv_mul_cancel_left, mul_inv_cancel]
+      Section.rightHom_section, mul_inv_rev, mul_inv_cancel_left, inv_mul_cancel_left,
+      mul_inv_cancel]
   have := DFunLike.congr_arg S'.extension.inl <|
     DFunLike.congr_fun (DFunLike.congr_fun ((S.σ.ofEquiv equiv).conjAct_eq S'.σ) g₁) <|
     Function.invFun S'.extension.inl <|
