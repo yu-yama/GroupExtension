@@ -121,7 +121,7 @@ section
 
 variable {E' : Type*} [Group E'] {S' : GroupExtension N E' G} (σ : S.Section) (equiv : S.Equiv S')
 
-/-- The composition of a homomorphism between equivalence group extensions and a section -/
+/-- The composition of a homomorphism between equivalent group extensions and a section -/
 @[to_additive "The composition of a homomorphism between equivalent additive group extensions and a
   section"]
 def ofEquiv : S'.Section where
