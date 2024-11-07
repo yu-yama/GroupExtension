@@ -98,8 +98,7 @@ theorem exists_inl_mul_section_mul : ∃ n : N, S.inl n * σ (g₁ * g₂) = σ 
 theorem exists_section_mul : ∃ n : N, σ (g₁ * g₂) = S.inl n * σ g₁ * σ g₂ := by
   obtain ⟨n, hn⟩ := exists_inl_mul_section_mul σ g₁ g₂
   use n⁻¹
-  rw [mul_assoc, map_inv, eq_inv_mul_iff_mul_eq]
-  exact hn
+  rw [mul_assoc, map_inv, eq_inv_mul_iff_mul_eq, hn]
 
 @[to_additive]
 theorem exists_section_mul_mul_inl : ∃ n : N, σ (g₁ * g₂) * S.inl n = σ g₁ * σ g₂ := by

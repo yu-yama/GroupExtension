@@ -158,7 +158,8 @@ variable (σ : S.Section)
 theorem rightHom_section (g : G) : S.rightHom (σ g) = g := σ.rightInverse_rightHom g
 
 @[to_additive (attr := simp)]
-theorem rightHom_comp_section : S.rightHom ∘ σ = id := Function.RightInverse.comp_eq_id σ.rightInverse_rightHom
+theorem rightHom_comp_section : S.rightHom ∘ σ = id :=
+  Function.RightInverse.comp_eq_id σ.rightInverse_rightHom
 
 end Section
 
