@@ -151,9 +151,8 @@ theorem inl_conjAct_comm {g : G} {n : N} :
 
 end Section
 
--- TODO: rename
 /-- `G` acts on `N` by conjugation. -/
-noncomputable def inducedConjAct : G →* MulAut N := S.surjInvRightHom.conjAct
+noncomputable def conjActSurjInvRightHom : G →* MulAut N := S.surjInvRightHom.conjAct
 
 end
 
@@ -169,7 +168,7 @@ structure ofMulDistribMulAction where
   /-- The group extension -/
   extension : GroupExtension N E G
   /-- `G` acts on `N` by conjugation. -/
-  smul_eq_inducedConjAct {g : G} {n : N} : g • n = extension.inducedConjAct g n
+  smul_eq_conjActSurjInvRightHom {g : G} {n : N} : g • n = extension.conjActSurjInvRightHom g n
 
 /-- Group extensions with specific choices of sections -/
 structure ofMulDistribMulActionWithSection extends ofMulDistribMulAction N G where
@@ -211,7 +210,7 @@ instance : Group S'.E := S'.GroupE
 
 /-- `G` acts on `N` by conjugation defined using the chosen section. -/
 theorem smul_eq_conjAct {g : G} {n : N} : g • n = S.σ.conjAct g n :=
-  Section.conjAct_eq _ S.σ ▸ S.smul_eq_inducedConjAct
+  Section.conjAct_eq _ S.σ ▸ S.smul_eq_conjActSurjInvRightHom
 
 -- TODO: rename either `Equiv` to disambiguate
 /-- Two terms of `GroupExtension.ofMulDistribMulActionWithSection` are equivalent iff their
@@ -458,9 +457,9 @@ def ofTwoCocycle : ofMulDistribMulActionWithSection N G where
   GroupE := inferInstance
   extension := extensionOfTwoCocycle f
   σ := sectionOfTwoCocycle f
-  smul_eq_inducedConjAct := by
+  smul_eq_conjActSurjInvRightHom := by
     intro g n
-    unfold inducedConjAct
+    unfold conjActSurjInvRightHom
     rw [Section.conjAct_eq _ (sectionOfTwoCocycle f)]
     simp only [Section.conjAct, MonoidHom.coe_mk, OneHom.coe_mk, sectionOfTwoCocycle]
     apply (extensionOfTwoCocycle f).inl_injective
