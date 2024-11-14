@@ -17,6 +17,11 @@ group extensions in general, see `Mathlib/GroupTheory/GroupExtension/Basic.lean`
   $H^1 (G, N)$
 - `GroupExtension.ofMulDistribMulAction.equivH2 [MulDistribMulAction G N]` : the bijection between
   the equivalence classes of group extensions and $H^2 (G, N)$
+
+## References
+
+* [Kenneth S. Brown, *Cohomology of groups*][brown1982]
+
 -/
 
 namespace SemidirectProduct
