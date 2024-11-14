@@ -212,7 +212,6 @@ instance : Group S'.E := S'.GroupE
 theorem smul_eq_conjAct {g : G} {n : N} : g • n = S.σ.conjAct g n :=
   Section.conjAct_eq _ S.σ ▸ S.smul_eq_conjActSurjInvRightHom
 
--- TODO: rename either `Equiv` to disambiguate
 /-- Two terms of `GroupExtension.ofMulDistribMulActionWithSection` are equivalent iff their
   extensions are equivalent and the sections commute with the homomorphism. -/
 structure Equiv extends S.extension.Equiv S'.extension where
@@ -393,7 +392,6 @@ def rightHom : middleOfTwoCocycle f →* G where
 @[simp]
 theorem rightHom_eq_right : (rightHom : middleOfTwoCocycle f → G) = right := rfl
 
--- TODO: reimplement using `inr` as in `SemidirectProduct`?
 theorem rightHom_surjective : Function.Surjective (rightHom (f := f)) := fun g ↦ ⟨⟨1, g⟩, rfl⟩
 
 theorem range_inl_eq_ker_rightHom : (inl (f := f)).range = (rightHom (f := f)).ker := by
