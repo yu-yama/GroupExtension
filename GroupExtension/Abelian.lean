@@ -269,8 +269,7 @@ noncomputable def toTwoCocycle :
     rw [S.smul_eq_conjAct]
     simp only [map_mul, Section.inl_conjAct_comm,
       Function.invFun_eq <| Section.section_mul_mul_mul_inv_mem_range _ _ _]
-    rw [Subgroup.mul_comm_of_mem_isCommutative _
-      (Section.section_mul_mul_mul_inv_mem_range _ _ _)
+    rw [Subgroup.mul_comm_of_mem_isCommutative _ (Section.section_mul_mul_mul_inv_mem_range _ _ _)
       (Section.section_mul_mul_mul_inv_mem_range _ _ _)]
     group
 
@@ -693,9 +692,9 @@ noncomputable def equivH2 :
     rintro ⟨f⟩
     unfold ofH2 toH2
     rw [← Quotient.mk]
-    simp only [Quotient.lift_mk, Quotient.eq (r := Submodule.quotientRel _), HasEquiv.Equiv,
-      instHasEquivOfSetoid, Submodule.quotientRel_def]
-    simpa only [ofMulDistribMulActionWithSection.toTwoCocycle_ofTwoCocycle] using
+    simpa only [Quotient.lift_mk, Quotient.eq (r := Submodule.quotientRel _), HasEquiv.Equiv,
+      instHasEquivOfSetoid, Submodule.quotientRel_def,
+      ofMulDistribMulActionWithSection.toTwoCocycle_ofTwoCocycle] using
       ofMulDistribMulActionWithSection.sub_mem_twoCoboundaries_of_toofMulDistribMulAction_equiv
       (Equiv.refl
         (ofMulDistribMulActionWithSection.ofTwoCocycle f).toofMulDistribMulAction.extension)
