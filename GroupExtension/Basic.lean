@@ -75,13 +75,13 @@ variable (g₁ g₂ : G)
 
 @[to_additive]
 theorem section_mul_mul_mul_inv_mem_range : σ g₁ * σ g₂ * (σ (g₁ * g₂))⁻¹ ∈ S.inl.range := by
-  rw [S.range_inl_eq_ker_rightHom, MonoidHom.mem_ker]
-  simp only [map_mul, map_inv, rightHom_section, mul_inv_cancel]
+  simp only [S.range_inl_eq_ker_rightHom, MonoidHom.mem_ker, map_mul, map_inv, rightHom_section,
+    mul_inv_cancel]
 
 @[to_additive]
 theorem section_mul_inv_mul_mul_mem_range : (σ (g₁ * g₂))⁻¹ * σ g₁ * σ g₂ ∈ S.inl.range := by
-  rw [S.range_inl_eq_ker_rightHom, MonoidHom.mem_ker]
-  simp only [map_mul, map_inv, rightHom_section, mul_assoc, inv_mul_cancel]
+  simp only [S.range_inl_eq_ker_rightHom, MonoidHom.mem_ker, map_mul, map_inv, rightHom_section,
+    mul_assoc, inv_mul_cancel]
 
 @[to_additive]
 theorem exists_section_mul_eq_inl_mul : ∃ n : N, σ (g₁ * g₂) = S.inl n * σ g₁ * σ g₂ := by
@@ -134,10 +134,9 @@ theorem comm : S.rightHom.comp S.inl = S'.rightHom.comp S'.inl := by
 theorem injective : Function.Injective equiv.toMonoidHom := by
   rw [injective_iff_map_eq_one]
   intro e he
-  have he' := congrArg S'.rightHom he
-  rw [S'.rightHom.map_one, ← MonoidHom.comp_apply, equiv.rightHom_comm, ← MonoidHom.mem_ker,
-    ← S.range_inl_eq_ker_rightHom] at he'
-  obtain ⟨n, rfl⟩ := he'
+  obtain ⟨n, rfl⟩ : e ∈ S.inl.range := by
+    simpa only [map_one, ← MonoidHom.comp_apply, equiv.rightHom_comm, S.range_inl_eq_ker_rightHom]
+      using congrArg S'.rightHom he
   rw [← MonoidHom.comp_apply, equiv.inl_comm,
     (injective_iff_map_eq_one' S'.inl).mp S'.inl_injective] at he
   rw [he, S.inl.map_one]
