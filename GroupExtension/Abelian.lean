@@ -550,7 +550,6 @@ noncomputable def equivTwoCocycles :
     exact ⟨ofTwoCocycleToTwoCocycleEquiv S⟩
   right_inv f := by rw [Quotient.lift_mk (s := setoid N G), toTwoCocycle_ofTwoCocycle]
 
--- TODO: is it more preferred to construct the corresponding 2-coboundary in a separate definition?
 /-- The difference of two 2-cocycles corresponding to equivalent group extensions
   (forgetting sections) is a 2-coboundary. -/
 theorem sub_mem_twoCoboundaries_of_toofMulDistribMulAction_equiv
@@ -628,7 +627,6 @@ end ofMulDistribMulActionWithSection
 
 namespace ofMulDistribMulAction
 
--- TODO: is it more preferred to construct the corresponding 2-coboundary in a separate definition?
 /-- The difference of two 2-cocycles corresponding to equivalent group extensions with arbitrary
   sections is a 2-coboundary. -/
 theorem sub_mem_twoCoboundaries_of_equiv {S S' : ofMulDistribMulAction N G} (equiv : S.Equiv S')
