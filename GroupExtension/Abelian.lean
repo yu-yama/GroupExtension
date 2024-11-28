@@ -154,6 +154,13 @@ theorem conjAct_eq (σ' : S.Section) : σ.conjAct = σ'.conjAct := by
 theorem inl_conjAct_comm {g : G} {n : N} :
     S.inl (σ.conjAct g n) = σ g * S.inl n * (σ g)⁻¹ := S.inl_conjAct_comm
 
+theorem conj_eq_of_rightHom_eq_one (σ' : S.Section) (g : G) {e : E} (he : S.rightHom e = 1) :
+    σ g * e * (σ g)⁻¹ = (σ' g) * e * (σ' g)⁻¹ := by
+  rw [← MonoidHom.mem_ker, ← S.range_inl_eq_ker_rightHom] at he
+  obtain ⟨n, rfl⟩ := he
+  simpa only [inl_conjAct_comm] using
+    DFunLike.congr_arg S.inl <| DFunLike.congr_fun (DFunLike.congr_fun (σ.conjAct_eq σ') g) n
+
 end Section
 
 /-- `G` acts on `N` by conjugation. -/
@@ -497,6 +504,9 @@ theorem toTwoCocycle_eq_of_equiv
   rw [inl_toTwoCocycle, ← equiv.inl_comm, MonoidHom.comp_apply, inl_toTwoCocycle]
   simp only [map_mul, map_inv, ← equiv.section_comm, Function.comp_apply]
 
+example {G : Type*} [Group G] {a b : G} (h : a * b * a⁻¹ = b) : a * b = b * a :=
+  eq_mul_of_mul_inv_eq h
+
 /-- `ofTwoCocycle` is a left inverse of `toTwoCocycle` up to equivalence of group extensions with
   sections-/
 def ofTwoCocycleToTwoCocycleEquiv (S : ofMulDistribMulActionWithSection N G) :
@@ -553,43 +563,34 @@ theorem sub_mem_twoCoboundaries_of_toofMulDistribMulAction_equiv
     S.σ.ofEquiv equiv g * (S'.σ g)⁻¹
   intro g₁ g₂
   rw [← groupCohomology.twoCocycles.val_eq_coe, AddSubgroupClass.coe_sub, Pi.sub_apply]
-  apply (Additive.toMul (α := N)).injective
   simp only [Rep.ofMulDistribMulAction_ρ_apply_apply, toMul_ofMul,
     groupCohomology.twoCocycles.val_eq_coe]
-  rw [toMul_add, toMul_sub, toMul_sub] -- does not work with `simp`
+  apply (Additive.toMul (α := N)).injective
   apply S'.extension.inl_injective
+  rw [toMul_add, toMul_sub, toMul_sub] -- does not work with `simp`
   simp only [div_eq_mul_inv, toMul_ofMul, map_mul, map_inv, inl_toTwoCocycle,
     Function.invFun_eq ((S.σ.ofEquiv equiv).section_mul_inv_mem_range S'.σ _), S'.smul_eq_conjAct,
     Section.inl_conjAct_comm]
   rw [← equiv.inl_comm, MonoidHom.comp_apply, inl_toTwoCocycle]
-  simp only [map_mul, map_inv, mul_inv_rev, inv_inv, ← mul_assoc, ← Section.ofEquiv_def]
-  congr 1
-  rw [← eq_mul_inv_iff_mul_eq, mul_assoc (S.σ.ofEquiv equiv g₁), mul_assoc (S.σ.ofEquiv equiv g₁),
-    mul_assoc (S.σ.ofEquiv equiv g₁)]
-  have h : (S.σ.ofEquiv equiv g₂) * (S.σ.ofEquiv equiv (g₁ * g₂))⁻¹ * S'.σ (g₁ * g₂) *
-      (S'.σ g₂)⁻¹ ∈ S'.extension.inl.range := by
-    simp only [S'.extension.range_inl_eq_ker_rightHom, MonoidHom.mem_ker, map_mul, map_inv,
-      Section.rightHom_section, mul_inv_rev, mul_inv_cancel_left, inv_mul_cancel_left,
-      mul_inv_cancel]
-  have := DFunLike.congr_arg S'.extension.inl <|
-    DFunLike.congr_fun (DFunLike.congr_fun ((S.σ.ofEquiv equiv).conjAct_eq S'.σ) g₁) <|
-    Function.invFun S'.extension.inl <|
-    (S.σ.ofEquiv equiv g₂) * (S.σ.ofEquiv equiv (g₁ * g₂))⁻¹ * S'.σ (g₁ * g₂) *
-      (S'.σ g₂)⁻¹
-  simp only [Section.inl_conjAct_comm, Function.invFun_eq h] at this
-  rw [this]
-  simp only [mul_assoc]
-  congr 2
-  rw [eq_inv_mul_iff_mul_eq]
-  repeat rw [← mul_assoc _ _ ((S.σ.ofEquiv equiv) (g₁ * g₂))⁻¹]
-  have h : (S'.σ g₂)⁻¹ * ((S'.σ g₁)⁻¹ * S'.σ (g₁ * g₂)) ∈ S'.extension.inl.range := by
-    simpa only [mul_inv_rev, inv_inv] using inv_mem <| S'.σ.section_mul_inv_mul_mul_mem_range g₁ g₂
-  have := DFunLike.congr_arg S'.extension.inl <|
-    DFunLike.congr_fun (DFunLike.congr_fun ((S.σ.ofEquiv equiv).conjAct_eq S'.σ) (g₁ * g₂)) <|
-    Function.invFun S'.extension.inl <| (S'.σ g₂)⁻¹ * ((S'.σ g₁)⁻¹ * S'.σ (g₁ * g₂))
-  simp only [Section.inl_conjAct_comm, Function.invFun_eq h] at this
-  rw [this]
-  simp only [← mul_assoc, mul_inv_cancel_right]
+  simp only [map_mul, map_inv, mul_inv_rev, inv_inv, ← Section.ofEquiv_def]
+  calc
+    _ = S'.σ g₁ * ((S.σ.ofEquiv equiv) g₂ * (S'.σ g₂)⁻¹ * (S'.σ g₁)⁻¹ * S'.σ (g₁ * g₂) *
+        ((S.σ.ofEquiv equiv) (g₁ * g₂))⁻¹ * (S.σ.ofEquiv equiv) g₁) * (S'.σ g₁)⁻¹ := by
+      simp only [mul_assoc]
+    _ = (S.σ.ofEquiv equiv) g₁ * ((S.σ.ofEquiv equiv) g₂ * (S'.σ g₂)⁻¹ * (S'.σ g₁)⁻¹ *
+        S'.σ (g₁ * g₂) * ((S.σ.ofEquiv equiv) (g₁ * g₂))⁻¹ * (S.σ.ofEquiv equiv) g₁) *
+        ((S.σ.ofEquiv equiv) g₁)⁻¹ := S'.σ.conj_eq_of_rightHom_eq_one (S.σ.ofEquiv equiv) g₁ <| by
+        simp only [map_mul, map_inv, Section.rightHom_section, mul_inv_cancel_right,
+          inv_mul_cancel_right, mul_inv_cancel]
+    _ = (S.σ.ofEquiv equiv) g₁ * (S.σ.ofEquiv equiv) g₂ * ((S.σ.ofEquiv equiv) (g₁ * g₂))⁻¹ *
+        ((S.σ.ofEquiv equiv) (g₁ * g₂) * ((S'.σ g₂)⁻¹ * (S'.σ g₁)⁻¹ *  S'.σ (g₁ * g₂)) *
+        ((S.σ.ofEquiv equiv) (g₁ * g₂))⁻¹) := by
+      simp only [← mul_assoc, mul_inv_cancel_right, inv_mul_cancel_right]
+    _ = (S.σ.ofEquiv equiv) g₁ * (S.σ.ofEquiv equiv) g₂ * ((S.σ.ofEquiv equiv) (g₁ * g₂))⁻¹ *
+        (S'.σ (g₁ * g₂) * ((S'.σ g₂)⁻¹ * (S'.σ g₁)⁻¹ * S'.σ (g₁ * g₂)) * (S'.σ (g₁ * g₂))⁻¹) := by
+      rw [(S.σ.ofEquiv equiv).conj_eq_of_rightHom_eq_one S'.σ (g₁ * g₂) <| by
+        simp only [map_mul, map_inv, Section.rightHom_section, ← mul_inv_rev, inv_mul_cancel]]
+    _ = _ := by simp only [← mul_assoc, mul_inv_cancel_right]
 
 /-- If the difference of two 2-cocycles is a 2-coboundary, then forgetting sections, the
   corresponding group extensions are equivalent. -/
