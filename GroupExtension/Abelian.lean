@@ -580,7 +580,7 @@ theorem sub_mem_twoCoboundaries_of_toofMulDistribMulAction_equiv
         simp only [map_mul, map_inv, Section.rightHom_section, mul_inv_cancel_right,
           inv_mul_cancel_right, mul_inv_cancel]
     _ = (S.σ.ofEquiv equiv) g₁ * (S.σ.ofEquiv equiv) g₂ * ((S.σ.ofEquiv equiv) (g₁ * g₂))⁻¹ *
-        ((S.σ.ofEquiv equiv) (g₁ * g₂) * ((S'.σ g₂)⁻¹ * (S'.σ g₁)⁻¹ *  S'.σ (g₁ * g₂)) *
+        ((S.σ.ofEquiv equiv) (g₁ * g₂) * ((S'.σ g₂)⁻¹ * (S'.σ g₁)⁻¹ * S'.σ (g₁ * g₂)) *
         ((S.σ.ofEquiv equiv) (g₁ * g₂))⁻¹) := by
       simp only [← mul_assoc, mul_inv_cancel_right, inv_mul_cancel_right]
     _ = (S.σ.ofEquiv equiv) g₁ * (S.σ.ofEquiv equiv) g₂ * ((S.σ.ofEquiv equiv) (g₁ * g₂))⁻¹ *
