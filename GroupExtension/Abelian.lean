@@ -593,7 +593,7 @@ theorem sub_mem_twoCoboundaries_of_toofMulDistribMulAction_equiv
 
 /-- If the difference of two 2-cocycles is a 2-coboundary, then forgetting sections, the
   corresponding group extensions are equivalent. -/
-noncomputable def toofMulDistribMulActionEquivOfTwoCocycleMulInvEq
+noncomputable def toofMulDistribMulActionEquivOfCochain
     {f f' : groupCohomology.twoCocycles (Rep.ofMulDistribMulAction G N)} {x : G → N}
     (h : ∀ g₁ g₂ : G, Additive.toMul (α := N) (f (g₁, g₂)) *
       (Additive.toMul (α := N) (f' (g₁, g₂)))⁻¹ = g₁ • x g₂ * (x (g₁ * g₂))⁻¹ * x g₁) :
@@ -653,7 +653,7 @@ def ofH2 (f : groupCohomology.twoCocycles (Rep.ofMulDistribMulAction G N)) :
   Quotient.mk _ (ofMulDistribMulActionWithSection.ofTwoCocycle f).toofMulDistribMulAction
 
 /-- The property of 2-coboundary specialized for `MulDistribMulAction` -/
-theorem exists_twoCocycle_mul_inv_eq_of_sub_mem_twoCoboundaries
+theorem exists_cochain_of_sub_mem_twoCoboundaries
     {f f' : groupCohomology.twoCocycles (Rep.ofMulDistribMulAction G N)}
     (h : f - f' ∈ groupCohomology.twoCoboundaries (Rep.ofMulDistribMulAction G N)) :
     ∃ x : G → N, ∀ g₁ g₂ : G, Additive.toMul (α := N) (f (g₁, g₂)) *
@@ -662,11 +662,12 @@ theorem exists_twoCocycle_mul_inv_eq_of_sub_mem_twoCoboundaries
   obtain ⟨x, hx⟩ := h
   use fun g ↦ Additive.toMul (α := N) (x g)
   intro g₁ g₂
-  specialize hx g₁ g₂
-  apply (Additive.toMul (α := N)).injective at hx
-  rw [Rep.ofMulDistribMulAction_ρ_apply_apply, toMul_sub, toMul_ofMul] at hx
-  simp only [← div_eq_mul_inv, hx, Pi.sub_apply, ← toMul_sub]
-  rfl
+  calc
+    _ = Additive.toMul (α := N) ((f - f') (g₁, g₂)) := by
+      simp only [← groupCohomology.twoCocycles.val_eq_coe, AddSubgroupClass.coe_sub, Pi.sub_apply,
+        ← div_eq_mul_inv, ← toMul_sub]
+    _ = _ := by
+      rw [← hx g₁ g₂, toMul_add, toMul_sub, Rep.ofMulDistribMulAction_ρ_apply_apply, toMul_ofMul, div_eq_mul_inv]
 
 variable (N G)
 
@@ -676,8 +677,8 @@ noncomputable def equivH2 :
   toFun := Quotient.lift toH2 fun _ _ ⟨equiv⟩ ↦ (Quotient.eq (r := Submodule.quotientRel _)).mpr <|
     (Submodule.quotientRel_def _).mpr <| sub_mem_twoCoboundaries_of_equiv equiv _ _
   invFun := Quotient.lift ofH2 fun _ _ h ↦ (Quotient.eq (r := setoid N G)).mpr
-    ⟨ofMulDistribMulActionWithSection.toofMulDistribMulActionEquivOfTwoCocycleMulInvEq
-      (exists_twoCocycle_mul_inv_eq_of_sub_mem_twoCoboundaries <|
+    ⟨ofMulDistribMulActionWithSection.toofMulDistribMulActionEquivOfCochain
+      (exists_cochain_of_sub_mem_twoCoboundaries <|
         (Submodule.quotientRel_def _).mp h).choose_spec⟩
   left_inv := by
     rintro ⟨S⟩
