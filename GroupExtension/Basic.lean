@@ -253,7 +253,7 @@ theorem trans {s₁ s₂ s₃ : S.Splitting} (h₁ : S.IsConj s₁ s₂) (h₂ :
   exact ⟨n₁ * n₂, by simp only [hn₁, hn₂, map_mul]; group⟩
 
 /-- The setoid of splittings with `N`-conjugacy -/
-@[to_additive]
+@[to_additive "The setoid of splittings with `N`-conjugacy"]
 def setoid : Setoid S.Splitting where
   r := S.IsConj
   iseqv := {
@@ -265,7 +265,7 @@ def setoid : Setoid S.Splitting where
 end IsConj
 
 /-- The `N`-conjugacy classes of splittings -/
-@[to_additive]
+@[to_additive "The `N`-conjugacy classes of splittings"]
 def ConjClasses (S : GroupExtension N E G) := Quotient <| IsConj.setoid S
 
 end GroupExtension
