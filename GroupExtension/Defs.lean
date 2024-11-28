@@ -86,6 +86,8 @@ structure Section where
 /-- `Splitting` of an additive group extension is a section homomorphism. -/
 structure Splitting extends G →+ E, S.Section
 
+attribute [nolint docBlame] Splitting.toSection
+
 end AddGroupExtension
 
 namespace GroupExtension
@@ -166,6 +168,8 @@ end Section
 /-- `Splitting` of a group extension is a section homomorphism. -/
 @[to_additive]
 structure Splitting extends G →* E, S.Section
+
+attribute [nolint docBlame] Splitting.toSection
 
 namespace Splitting
 
