@@ -667,7 +667,8 @@ theorem exists_cochain_of_sub_mem_twoCoboundaries
       simp only [← groupCohomology.twoCocycles.val_eq_coe, AddSubgroupClass.coe_sub, Pi.sub_apply,
         ← div_eq_mul_inv, ← toMul_sub]
     _ = _ := by
-      rw [← hx g₁ g₂, toMul_add, toMul_sub, Rep.ofMulDistribMulAction_ρ_apply_apply, toMul_ofMul, div_eq_mul_inv]
+      rw [← hx g₁ g₂, toMul_add, toMul_sub, Rep.ofMulDistribMulAction_ρ_apply_apply, toMul_ofMul,
+        div_eq_mul_inv]
 
 variable (N G)
 
