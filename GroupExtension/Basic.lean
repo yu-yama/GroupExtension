@@ -101,9 +101,6 @@ namespace Equiv
 variable {S}
 variable {E' : Type*} [Group E'] {S' : GroupExtension N E' G} (equiv : S.Equiv S')
 
-example : S.rightHom.comp S.inl = S'.rightHom.comp S'.inl := by
-  simp only [rightHom_comp_inl]
-
 /-- The four lemma (deriving injectivity) specialized for group extensions -/
 @[to_additive "The four lemma (deriving injectivity) specialized for additive group extensions"]
 theorem injective : Function.Injective equiv.toMonoidHom := by
