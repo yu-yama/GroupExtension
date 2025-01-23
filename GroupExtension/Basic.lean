@@ -37,14 +37,8 @@ noncomputable def surjInvRightHom : S.Section where
 namespace Section
 
 variable {S}
-
-section
-
-variable (σ : S.Section)
-
-section
-
-variable (σ' : S.Section) (g : G)
+variable {E' : Type*} [Group E'] {S' : GroupExtension N E' G} (σ σ' : S.Section) (g g₁ g₂ : G)
+  (equiv : S.Equiv S')
 
 @[to_additive]
 theorem section_mul_inv_mem_range : σ g * (σ' g)⁻¹ ∈ S.inl.range := by
@@ -65,12 +59,6 @@ theorem exists_inl_mul_section : ∃ n : N, σ g = S.inl n * σ' g := by
 theorem exists_section_mul_inl : ∃ n : N, σ g = σ' g * S.inl n := by
   obtain ⟨n, hn⟩ := section_inv_mul_mem_range σ' σ g
   exact ⟨n, by rw [hn, mul_inv_cancel_left]⟩
-
-end
-
-section
-
-variable (g₁ g₂ : G)
 
 @[to_additive]
 theorem section_mul_mul_mul_inv_mem_range : σ g₁ * σ g₂ * (σ (g₁ * g₂))⁻¹ ∈ S.inl.range := by
@@ -94,14 +82,6 @@ theorem exists_section_mul_eq_mul_inl : ∃ n : N, σ (g₁ * g₂) = σ g₁ * 
   use n⁻¹
   rw [map_inv, eq_mul_inv_iff_mul_eq, ← eq_inv_mul_iff_mul_eq, ← mul_assoc, hn]
 
-end
-
-end
-
-section
-
-variable {E' : Type*} [Group E'] {S' : GroupExtension N E' G} (σ : S.Section) (equiv : S.Equiv S')
-
 /-- The composition of a homomorphism between equivalent group extensions and a section -/
 @[to_additive
       "The composition of a homomorphism between equivalent additive group extensions and a
@@ -113,8 +93,6 @@ def ofEquiv : S'.Section where
 
 @[to_additive]
 theorem ofEquiv_def (g : G) : σ.ofEquiv equiv g = equiv.toMonoidHom (σ g) := rfl
-
-end
 
 end Section
 
