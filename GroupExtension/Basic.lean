@@ -203,7 +203,7 @@ variable (s : S.Splitting)
 noncomputable def conjAct : G →* MulAut N := S.conjAct.comp s
 
 /-- A group homomorphism from the corresponding semidirect product -/
-def monoidHom_semidirectProduct : N ⋊[s.conjAct] G →* E where
+def semidirectProductMonoidHom : N ⋊[s.conjAct] G →* E where
   toFun := fun ⟨n, g⟩ ↦ S.inl n * s g
   map_one' := by simp only [map_one, mul_one]
   map_mul' := fun ⟨n₁, g₁⟩ ⟨n₂, g₂⟩ ↦ by
@@ -211,22 +211,23 @@ def monoidHom_semidirectProduct : N ⋊[s.conjAct] G →* E where
     group
 
 /-- A split group extension is equivalent to the extension associated to a semidirect product. -/
-def equiv_semidirectProduct : (SemidirectProduct.toGroupExtension s.conjAct).Equiv S where
-  toMonoidHom := monoidHom_semidirectProduct s
+def semidirectProductToGroupExtensionEquiv :
+    (SemidirectProduct.toGroupExtension s.conjAct).Equiv S where
+  toMonoidHom := semidirectProductMonoidHom s
   inl_comm := by
     ext n
     simp only [SemidirectProduct.toGroupExtension, MonoidHom.comp_apply,
-      monoidHom_semidirectProduct, MonoidHom.coe_mk, OneHom.coe_mk, SemidirectProduct.left_inl,
+      semidirectProductMonoidHom, MonoidHom.coe_mk, OneHom.coe_mk, SemidirectProduct.left_inl,
       SemidirectProduct.right_inl, map_one, mul_one]
   rightHom_comm := by
     ext ⟨n, g⟩
     simp only [SemidirectProduct.toGroupExtension, MonoidHom.comp_apply,
-      SemidirectProduct.rightHom_eq_right, monoidHom_semidirectProduct, MonoidHom.coe_mk,
+      SemidirectProduct.rightHom_eq_right, semidirectProductMonoidHom, MonoidHom.coe_mk,
       OneHom.coe_mk, map_mul, rightHom_inl, rightHom_splitting, one_mul]
 
 /-- The group associated to a split extension is isomorphic to a semidirect product. -/
-noncomputable def mulEquiv_semidirectProduct : N ⋊[s.conjAct] G ≃* E :=
-  s.equiv_semidirectProduct.toMulEquiv
+noncomputable def semidirectProductMulEquiv : N ⋊[s.conjAct] G ≃* E :=
+  s.semidirectProductToGroupExtensionEquiv.toMulEquiv
 
 end Splitting
 
