@@ -124,11 +124,8 @@ namespace Equiv
 variable {S}
 variable {E' : Type*} [Group E'] {S' : GroupExtension N E' G} (equiv : S.Equiv S')
 
-include equiv in
-/-- The short exact sequences of equivalent group extensions commute. -/
-@[to_additive "The short exact sequences of equivalent additive group extensions commute."]
-theorem comm : S.rightHom.comp S.inl = S'.rightHom.comp S'.inl := by
-  rw [← equiv.rightHom_comm, MonoidHom.comp_assoc, equiv.inl_comm]
+example : S.rightHom.comp S.inl = S'.rightHom.comp S'.inl := by
+  simp only [rightHom_comp_inl]
 
 /-- The four lemma (deriving injectivity) specialized for group extensions -/
 @[to_additive "The four lemma (deriving injectivity) specialized for additive group extensions"]
