@@ -30,10 +30,9 @@ noncomputable def quotientRangeInlEquivRight : E ⧸ S.inl.range ≃* G :=
 
 /-- The inverse of the surjective `S.rightHom` -/
 @[to_additive surjInvRightHom "The inverse of the surjective `S.rightHom`." ]
-noncomputable def surjInvRightHom : S.Section := {
+noncomputable def surjInvRightHom : S.Section where
   toFun := Function.surjInv S.rightHom_surjective
   rightInverse_rightHom := Function.surjInv_eq S.rightHom_surjective
-}
 
 namespace Section
 
