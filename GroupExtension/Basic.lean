@@ -104,8 +104,9 @@ section
 variable {E' : Type*} [Group E'] {S' : GroupExtension N E' G} (σ : S.Section) (equiv : S.Equiv S')
 
 /-- The composition of a homomorphism between equivalent group extensions and a section -/
-@[to_additive "The composition of a homomorphism between equivalent additive group extensions and a
-  section"]
+@[to_additive
+      "The composition of a homomorphism between equivalent additive group extensions and a
+      section"]
 def ofEquiv : S'.Section where
   toFun := equiv.toMonoidHom ∘ σ
   rightInverse_rightHom g := by
@@ -158,7 +159,8 @@ theorem bijective : Function.Bijective equiv.toMonoidHom := ⟨equiv.injective, 
 
 /-- The homomorphism associated to an equivalence of group extensions is an isomorphism. -/
 @[to_additive
-  "The homomorphism associated to an equivalence of additive group extensions is an isomorphism."]
+      "The homomorphism associated to an equivalence of additive group extensions is an
+      isomorphism."]
 noncomputable def toMulEquiv : E ≃* E' := MulEquiv.ofBijective equiv.toMonoidHom equiv.bijective
 
 @[to_additive]
@@ -182,11 +184,11 @@ noncomputable def symm : S'.Equiv S where
     rw [← equiv.rightHom_comm, MonoidHom.comp_assoc, ← toMulEquiv_eq_toMonoidHom,
       MulEquiv.coe_monoidHom_comp_coe_monoidHom_symm, MonoidHom.comp_id]
 
-/-- The composition of monoid homomorphisms associated to equivalences of group extensions induces
-  another equivalence. -/
+/-- The composition of monoid homomorphisms associated to equivalences of group extensions gives
+    another equivalence. -/
 @[to_additive
-  "The composition of monoid homomorphisms associated to equivalences of group extensions induces
-  another equivalence."]
+      "The composition of monoid homomorphisms associated to equivalences of additive group
+      extensions gives another equivalence."]
 def trans {E'' : Type*} [Group E''] {S'' : GroupExtension N E'' G} (equiv' : S'.Equiv S'') :
     S.Equiv S'' where
   toMonoidHom := equiv'.toMonoidHom.comp equiv.toMonoidHom
@@ -234,18 +236,18 @@ end Splitting
 namespace IsConj
 
 /-- `N`-conjugacy is reflexive. -/
-@[to_additive]
+@[to_additive "`N`-conjugacy is reflexive."]
 theorem refl (s : S.Splitting) : S.IsConj s s :=
   ⟨1, by simp only [map_one, inv_one, one_mul, mul_one]⟩
 
 /-- `N`-conjugacy is symmetric. -/
-@[to_additive]
+@[to_additive "`N`-conjugacy is symmetric."]
 theorem symm {s₁ s₂ : S.Splitting} (h : S.IsConj s₁ s₂) : S.IsConj s₂ s₁ := by
   obtain ⟨n, hn⟩ := h
   exact ⟨n⁻¹, by simp only [hn, map_inv]; group⟩
 
 /-- `N`-conjugacy is transitive. -/
-@[to_additive]
+@[to_additive "`N`-conjugacy is transitive."]
 theorem trans {s₁ s₂ s₃ : S.Splitting} (h₁ : S.IsConj s₁ s₂) (h₂ : S.IsConj s₂ s₃) :
     S.IsConj s₁ s₃ := by
   obtain ⟨n₁, hn₁⟩ := h₁
