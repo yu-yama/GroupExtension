@@ -227,7 +227,7 @@ theorem smul_eq_conjAct {g : G} {n : N} : g • n = S.σ.conjAct g n :=
 /-- Two terms of `GroupExtension.ofMulDistribMulActionWithSection` are equivalent iff their
   extensions are equivalent and the sections commute with the homomorphism. -/
 structure Equiv extends S.extension.Equiv S'.extension where
-  section_comm : toMonoidHom ∘ S.σ = S'.σ
+  section_comm : toMulEquiv ∘ S.σ = S'.σ
 
 variable (N G)
 
@@ -239,19 +239,20 @@ instance setoid : Setoid (ofMulDistribMulActionWithSection N G) where
       __ := GroupExtension.Equiv.refl S.extension
       section_comm := by
         ext g
-        simp only [GroupExtension.Equiv.refl, Function.comp_apply, MonoidHom.id_apply]
+        simp only [GroupExtension.Equiv.refl, Function.comp_apply, MulEquiv.refl_apply]
     }⟩
     symm := fun ⟨equiv⟩ ↦ ⟨{
-      __ := GroupExtension.Equiv.symm equiv.toEquiv
+      -- TODO: avoid numbering in automatically generated definitions
+      __ := GroupExtension.Equiv.symm equiv.toEquiv_1
       section_comm := by
-        simp only [GroupExtension.Equiv.symm, MonoidHom.coe_coe, MulEquiv.symm_comp_eq,
-          GroupExtension.Equiv.toMulEquiv_eq_toMonoidHom]
+        simp only [GroupExtension.Equiv.symm, MulEquiv.symm_comp_eq]
         exact equiv.section_comm.symm
     }⟩
     trans := fun ⟨equiv⟩ ⟨equiv'⟩ ↦ ⟨{
-      __ := GroupExtension.Equiv.trans equiv.toEquiv equiv'.toEquiv
+      __ := GroupExtension.Equiv.trans equiv.toEquiv_1 equiv'.toEquiv_1
       section_comm := by
-        simp only [GroupExtension.Equiv.trans, MonoidHom.coe_comp, Function.comp_assoc,
+        simp only [GroupExtension.Equiv.trans, MulEquiv.trans, MulEquiv.toEquiv_eq_coe,
+          MulEquiv.coe_mk, Equiv.coe_trans, EquivLike.coe_coe, Function.comp_assoc,
           equiv.section_comm, equiv'.section_comm]
     }⟩
   }
@@ -503,7 +504,7 @@ theorem toTwoCocycle_eq_of_equiv
   ext g₁ g₂
   apply (Additive.toMul (α := N)).injective
   apply S'.extension.inl_injective
-  rw [inl_toTwoCocycle, ← equiv.inl_comm, MonoidHom.comp_apply, inl_toTwoCocycle]
+  rw [inl_toTwoCocycle, ← equiv.inl_comm, Function.comp_apply, inl_toTwoCocycle]
   simp only [map_mul, map_inv, ← equiv.section_comm, Function.comp_apply]
 
 example {G : Type*} [Group G] {a b : G} (h : a * b * a⁻¹ = b) : a * b = b * a :=
