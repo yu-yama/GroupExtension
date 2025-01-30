@@ -127,55 +127,7 @@ noncomputable def ofMonoidHom (f : E →* E') (comp_inl : f.comp S.inl = S'.inl)
   inl_comm := congrArg DFunLike.coe comp_inl
   rightHom_comm := congrArg DFunLike.coe rightHom_comp
 
-@[to_additive]
-noncomputable def ofMonoidHom' (f : E →* E') (inl_comm : f.comp S.inl = S'.inl)
-    (rightHom_comm : S'.rightHom.comp f = S.rightHom) : S.Equiv S' where
-  __ := MulEquiv.ofBijective f ⟨by
-      rw [injective_iff_map_eq_one]
-      intro e he
-      obtain ⟨n, rfl⟩ : e ∈ S.inl.range := by
-        simpa only [map_one, ← MonoidHom.comp_apply, rightHom_comm, S.range_inl_eq_ker_rightHom]
-          using congrArg S'.rightHom he
-      rw [← MonoidHom.comp_apply, inl_comm,
-        (injective_iff_map_eq_one' S'.inl).mp S'.inl_injective] at he
-      rw [he, S.inl.map_one], by
-      intro e'
-      obtain ⟨e, he⟩ := S.rightHom_surjective (S'.rightHom e')
-      rw [eq_comm, ← rightHom_comm, MonoidHom.comp_apply, MonoidHom.eq_iff,
-        ← S'.range_inl_eq_ker_rightHom] at he
-      obtain ⟨n, hn⟩ := he
-      use e * S.inl n
-      rw [map_mul, ← MonoidHom.comp_apply, inl_comm, hn, mul_inv_cancel_left]
-    ⟩
-  inl_comm := congrArg DFunLike.coe inl_comm
-  rightHom_comm := congrArg DFunLike.coe rightHom_comm
-
 variable (equiv : S.Equiv S')
-
-/-- The four lemma (deriving injectivity) specialized for group extensions -/
-@[to_additive "The four lemma (deriving injectivity) specialized for additive group extensions"]
-theorem injective : Function.Injective equiv := by
-  rw [injective_iff_map_eq_one]
-  intro e he
-  obtain ⟨n, rfl⟩ : e ∈ S.inl.range := by
-    simpa only [map_one, rightHom_map, S.range_inl_eq_ker_rightHom]
-      using congrArg S'.rightHom he
-  rw [map_inl, (injective_iff_map_eq_one' S'.inl).mp S'.inl_injective] at he
-  rw [he, S.inl.map_one]
-
-/-- The four lemma (deriving surjectivity) specialized for group extensions -/
-@[to_additive "The four lemma (deriving surjectivity) specialized for additive group extensions"]
-theorem surjective : Function.Surjective equiv := by
-  intro e'
-  obtain ⟨e, he⟩ := S.rightHom_surjective (S'.rightHom e')
-  rw [eq_comm, ← equiv.rightHom_map, MonoidHom.eq_iff, ← S'.range_inl_eq_ker_rightHom] at he
-  obtain ⟨n, hn⟩ := he
-  use e * S.inl n
-  rw [map_mul, map_inl, hn, mul_inv_cancel_left]
-
-/-- The five lemma specialized for group extensions -/
-@[to_additive "The five lemma specialized for additive group extensions"]
-theorem bijective : Function.Bijective equiv := ⟨equiv.injective, equiv.surjective⟩
 
 /-- A group extension is equivalent to itself. -/
 @[to_additive "An additive group extension is equivalent to itself."]
