@@ -203,11 +203,10 @@ variable (N G)
 /-- The setoid on the equivalence of extensions -/
 def setoid : Setoid (ofMulDistribMulAction N G) where
   r S S' := Nonempty (S.Equiv S')
-  iseqv := {
-    refl := fun S ↦ ⟨GroupExtension.Equiv.refl S.extension⟩
+  iseqv :=
+  { refl := fun S ↦ ⟨GroupExtension.Equiv.refl S.extension⟩
     symm := fun ⟨equiv⟩ ↦ ⟨GroupExtension.Equiv.symm equiv⟩
-    trans := fun ⟨equiv⟩ ⟨equiv'⟩ ↦ ⟨GroupExtension.Equiv.trans equiv equiv'⟩
-  }
+    trans := fun ⟨equiv⟩ ⟨equiv'⟩ ↦ ⟨GroupExtension.Equiv.trans equiv equiv'⟩ }
 
 /-- The equivalence classes of group extensions -/
 def EquivClasses := Quotient <| setoid N G
@@ -234,8 +233,8 @@ variable (N G)
 /-- The setoid on equivalence of group extensions with sections -/
 instance setoid : Setoid (ofMulDistribMulActionWithSection N G) where
   r S S' := Nonempty (S.Equiv S')
-  iseqv := {
-    refl := fun S ↦ ⟨{
+  iseqv :=
+  { refl := fun S ↦ ⟨{
       __ := GroupExtension.Equiv.refl S.extension
       section_comm := by
         ext g
@@ -254,8 +253,7 @@ instance setoid : Setoid (ofMulDistribMulActionWithSection N G) where
         simp only [GroupExtension.Equiv.trans, MulEquiv.trans, MulEquiv.toEquiv_eq_coe,
           MulEquiv.coe_mk, Equiv.coe_trans, EquivLike.coe_coe, Function.comp_assoc,
           equiv.section_comm, equiv'.section_comm]
-    }⟩
-  }
+    }⟩ }
 
 /-- The equivalence classes of group extensions with sections -/
 def EquivClasses := Quotient <| setoid N G
