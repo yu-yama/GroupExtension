@@ -138,7 +138,7 @@ noncomputable def conjAct : G →* MulAut N where
     ext n
     apply S.inl_injective
     simp only [MulAut.mul_apply, inl_conjAct_comm]
-    obtain ⟨n', hn'⟩ := exists_section_mul_eq_mul_inl σ g₁ g₂
+    obtain ⟨n', hn'⟩ := exists_mul_eq_mul_mul_inl σ g₁ g₂
     rw [hn', mul_assoc _ (S.inl n'), ← S.inl.map_mul, mul_comm, map_mul]
     group
 
@@ -146,7 +146,7 @@ noncomputable def conjAct : G →* MulAut N where
 theorem conjAct_eq (σ' : S.Section) : σ.conjAct = σ'.conjAct := by
   ext1 g
   simp only [conjAct, MonoidHom.coe_mk, OneHom.coe_mk]
-  obtain ⟨n, hn⟩ := σ.exists_inl_mul_section σ' g
+  obtain ⟨n, hn⟩ := σ.exists_eq_inl_mul σ' g
   simp only [hn, map_mul, conjAct_inl, one_mul]
 
 /-- The inclusion and a conjugation commute. -/
@@ -274,9 +274,9 @@ noncomputable def toTwoCocycle :
     apply S.extension.inl_injective
     rw [S.smul_eq_conjAct]
     simp only [map_mul, Section.inl_conjAct_comm,
-      Function.invFun_eq <| Section.section_mul_mul_mul_inv_mem_range _ _ _]
-    rw [Subgroup.mul_comm_of_mem_isCommutative _ (Section.section_mul_mul_mul_inv_mem_range _ _ _)
-      (Section.section_mul_mul_mul_inv_mem_range _ _ _)]
+      Function.invFun_eq <| Section.mul_mul_mul_inv_mem_range_inl _ _ _]
+    rw [Subgroup.mul_comm_of_mem_isCommutative _ (Section.mul_mul_mul_inv_mem_range_inl _ _ _)
+      (Section.mul_mul_mul_inv_mem_range_inl _ _ _)]
     group
 
 theorem toTwoCocycle_apply (g₁ g₂ : G) : S.toTwoCocycle (g₁, g₂) =
@@ -286,7 +286,7 @@ theorem inl_toTwoCocycle (g₁ g₂ : G) :
     S.extension.inl (Additive.toMul (α := N) (S.toTwoCocycle (g₁, g₂))) =
     S.σ g₁ * S.σ g₂ * (S.σ (g₁ * g₂))⁻¹ := by
   simp only [toTwoCocycle_apply, toMul_ofMul,
-    Function.invFun_eq <| Section.section_mul_mul_mul_inv_mem_range S.σ g₁ g₂]
+    Function.invFun_eq <| Section.mul_mul_mul_inv_mem_range_inl S.σ g₁ g₂]
 
 end ofMulDistribMulActionWithSection
 
@@ -485,7 +485,7 @@ theorem toTwoCocycle_ofTwoCocycle :
   apply (extensionOfTwoCocycle f).inl_injective
   rw [toMul_ofMul,
     Function.invFun_eq <|
-      Section.section_mul_mul_mul_inv_mem_range _ g₁ g₂,
+      Section.mul_mul_mul_inv_mem_range_inl _ g₁ g₂,
     extensionOfTwoCocycle_inl]
   simp only [sectionOfTwoCocycle, middleOfTwoCocycle.mul_def, middleOfTwoCocycle.inv_left,
     middleOfTwoCocycle.inv_right, mul_inv, smul_mul', smul_inv', Section.coe_mk, smul_one, mul_one,
@@ -575,7 +575,7 @@ theorem sub_mem_twoCoboundaries_of_toofMulDistribMulAction_equiv
   rw [← groupCohomology.twoCocycles.val_eq_coe, AddSubgroupClass.coe_sub, Pi.sub_apply, toMul_add,
     toMul_sub, toMul_sub]
   simp only [groupCohomology.twoCocycles.val_eq_coe, div_eq_mul_inv, toMul_ofMul, map_mul, map_inv,
-    inl_toTwoCocycle, Function.invFun_eq ((S.σ.equivComp equiv).section_mul_inv_mem_range S'.σ _),
+    inl_toTwoCocycle, Function.invFun_eq ((S.σ.equivComp equiv).mul_inv_mem_range_inl S'.σ _),
     S'.smul_eq_conjAct, Section.inl_conjAct_comm]
   calc
     _ = S'.σ g₁ * ((S.σ.equivComp equiv) g₂ * (S'.σ g₂)⁻¹ * (S'.σ g₁)⁻¹ * S'.σ (g₁ * g₂) *
