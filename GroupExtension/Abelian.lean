@@ -569,7 +569,7 @@ theorem sub_mem_twoCoboundaries_of_toofMulDistribMulAction_equiv
     groupCohomology.twoCoboundaries (Rep.ofMulDistribMulAction G N) := by
   rw [groupCohomology.mem_twoCoboundaries_iff]
   use fun g ↦ Additive.ofMul (α := N) <| Function.invFun S'.extension.inl <|
-    S.σ.ofEquiv equiv g * (S'.σ g)⁻¹
+    S.σ.equivComp equiv g * (S'.σ g)⁻¹
   intro g₁ g₂
   apply (Additive.toMul (α := N)).injective
   apply S'.extension.inl_injective
@@ -577,28 +577,29 @@ theorem sub_mem_twoCoboundaries_of_toofMulDistribMulAction_equiv
   rw [← groupCohomology.twoCocycles.val_eq_coe, AddSubgroupClass.coe_sub, Pi.sub_apply, toMul_add,
     toMul_sub, toMul_sub]
   simp only [groupCohomology.twoCocycles.val_eq_coe, div_eq_mul_inv, toMul_ofMul, map_mul, map_inv,
-    inl_toTwoCocycle, Function.invFun_eq ((S.σ.ofEquiv equiv).section_mul_inv_mem_range S'.σ _),
+    inl_toTwoCocycle, Function.invFun_eq ((S.σ.equivComp equiv).section_mul_inv_mem_range S'.σ _),
     S'.smul_eq_conjAct, Section.inl_conjAct_comm]
   calc
-    _ = S'.σ g₁ * ((S.σ.ofEquiv equiv) g₂ * (S'.σ g₂)⁻¹ * (S'.σ g₁)⁻¹ * S'.σ (g₁ * g₂) *
-        ((S.σ.ofEquiv equiv) (g₁ * g₂))⁻¹ * (S.σ.ofEquiv equiv) g₁) * (S'.σ g₁)⁻¹ := by
+    _ = S'.σ g₁ * ((S.σ.equivComp equiv) g₂ * (S'.σ g₂)⁻¹ * (S'.σ g₁)⁻¹ * S'.σ (g₁ * g₂) *
+        ((S.σ.equivComp equiv) (g₁ * g₂))⁻¹ * (S.σ.equivComp equiv) g₁) * (S'.σ g₁)⁻¹ := by
       simp only [mul_assoc, mul_inv_rev, inv_inv]
-    _ = (S.σ.ofEquiv equiv) g₁ * ((S.σ.ofEquiv equiv) g₂ * (S'.σ g₂)⁻¹ * (S'.σ g₁)⁻¹ *
-        S'.σ (g₁ * g₂) * ((S.σ.ofEquiv equiv) (g₁ * g₂))⁻¹ * (S.σ.ofEquiv equiv) g₁) *
-        ((S.σ.ofEquiv equiv) g₁)⁻¹ := S'.σ.conj_eq_of_rightHom_eq_one (S.σ.ofEquiv equiv) g₁ <| by
+    _ = (S.σ.equivComp equiv) g₁ * ((S.σ.equivComp equiv) g₂ * (S'.σ g₂)⁻¹ * (S'.σ g₁)⁻¹ *
+        S'.σ (g₁ * g₂) * ((S.σ.equivComp equiv) (g₁ * g₂))⁻¹ * (S.σ.equivComp equiv) g₁) *
+        ((S.σ.equivComp equiv) g₁)⁻¹ :=
+      S'.σ.conj_eq_of_rightHom_eq_one (S.σ.equivComp equiv) g₁ <| by
         simp only [map_mul, map_inv, Section.rightHom_section, mul_inv_cancel_right,
           inv_mul_cancel_right, mul_inv_cancel]
-    _ = (S.σ.ofEquiv equiv) g₁ * (S.σ.ofEquiv equiv) g₂ * ((S.σ.ofEquiv equiv) (g₁ * g₂))⁻¹ *
-        ((S.σ.ofEquiv equiv) (g₁ * g₂) * ((S'.σ g₂)⁻¹ * (S'.σ g₁)⁻¹ * S'.σ (g₁ * g₂)) *
-        ((S.σ.ofEquiv equiv) (g₁ * g₂))⁻¹) := by
+    _ = (S.σ.equivComp equiv) g₁ * (S.σ.equivComp equiv) g₂ * ((S.σ.equivComp equiv) (g₁ * g₂))⁻¹ *
+        ((S.σ.equivComp equiv) (g₁ * g₂) * ((S'.σ g₂)⁻¹ * (S'.σ g₁)⁻¹ * S'.σ (g₁ * g₂)) *
+        ((S.σ.equivComp equiv) (g₁ * g₂))⁻¹) := by
       simp only [← mul_assoc, mul_inv_cancel_right, inv_mul_cancel_right]
-    _ = (S.σ.ofEquiv equiv) g₁ * (S.σ.ofEquiv equiv) g₂ * ((S.σ.ofEquiv equiv) (g₁ * g₂))⁻¹ *
+    _ = (S.σ.equivComp equiv) g₁ * (S.σ.equivComp equiv) g₂ * ((S.σ.equivComp equiv) (g₁ * g₂))⁻¹ *
         (S'.σ (g₁ * g₂) * ((S'.σ g₂)⁻¹ * (S'.σ g₁)⁻¹ * S'.σ (g₁ * g₂)) * (S'.σ (g₁ * g₂))⁻¹) := by
-      rw [(S.σ.ofEquiv equiv).conj_eq_of_rightHom_eq_one S'.σ (g₁ * g₂) <| by
+      rw [(S.σ.equivComp equiv).conj_eq_of_rightHom_eq_one S'.σ (g₁ * g₂) <| by
         simp only [map_mul, map_inv, Section.rightHom_section, ← mul_inv_rev, inv_mul_cancel]]
     _ = _ := by
       simp only [← equiv.inl_comm, Function.comp_apply, inl_toTwoCocycle, map_mul, map_inv,
-        mul_inv_rev, inv_inv, Section.ofEquiv_def, ← mul_assoc, mul_inv_cancel_right,
+        mul_inv_rev, inv_inv, Section.equivComp_apply, ← mul_assoc, mul_inv_cancel_right,
         equiv.toMulEquiv_eq_coe, equiv.coe_toMulEquiv]
 
 /-- If the difference of two 2-cocycles is a 2-coboundary, then forgetting sections, the
