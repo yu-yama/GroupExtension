@@ -242,13 +242,13 @@ instance setoid : Setoid (ofMulDistribMulActionWithSection N G) where
     }⟩
     symm := fun ⟨equiv⟩ ↦ ⟨{
       -- TODO: avoid numbering in automatically generated definitions
-      __ := GroupExtension.Equiv.symm equiv.toEquiv_1
+      __ := equiv.toEquiv_1.symm
       section_comm := by
         simp only [GroupExtension.Equiv.symm, MulEquiv.symm_comp_eq]
         exact equiv.section_comm.symm
     }⟩
     trans := fun ⟨equiv⟩ ⟨equiv'⟩ ↦ ⟨{
-      __ := GroupExtension.Equiv.trans equiv.toEquiv_1 equiv'.toEquiv_1
+      __ := equiv.toEquiv_1.trans equiv'.toEquiv_1
       section_comm := by
         simp only [GroupExtension.Equiv.trans, MulEquiv.trans, MulEquiv.toEquiv_eq_coe,
           MulEquiv.coe_mk, Equiv.coe_trans, EquivLike.coe_coe, Function.comp_assoc,
