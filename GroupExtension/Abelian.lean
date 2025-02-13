@@ -85,7 +85,7 @@ theorem isConj_iff_sub_mem_oneCoboundaries (s₁ s₂ : (toGroupExtension φ).Sp
     splittingToOneCocycle φ s₁ - splittingToOneCocycle φ s₂ ∈
     groupCohomology.oneCoboundaries (toRep φ) := by
   rw [sub_mem_comm_iff, groupCohomology.mem_oneCoboundaries_iff]
-  apply Equiv.exists_congr Additive.ofMul
+  apply Additive.ofMul.exists_congr
   intro n
   rw [funext_iff]
   apply forall_congr'
@@ -205,8 +205,8 @@ def setoid : Setoid (ofMulDistribMulAction N G) where
   r S S' := Nonempty (S.Equiv S')
   iseqv :=
   { refl := fun S ↦ ⟨GroupExtension.Equiv.refl S.extension⟩
-    symm := fun ⟨equiv⟩ ↦ ⟨GroupExtension.Equiv.symm equiv⟩
-    trans := fun ⟨equiv⟩ ⟨equiv'⟩ ↦ ⟨GroupExtension.Equiv.trans equiv equiv'⟩ }
+    symm := fun ⟨equiv⟩ ↦ ⟨equiv.symm⟩
+    trans := fun ⟨equiv⟩ ⟨equiv'⟩ ↦ ⟨equiv.trans equiv'⟩ }
 
 /-- The equivalence classes of group extensions -/
 def EquivClasses := Quotient <| setoid N G
@@ -270,7 +270,7 @@ noncomputable def toTwoCocycle :
     intro g₁ g₂ g₃
     dsimp
     repeat rw [← ofMul_mul]
-    rw [Equiv.apply_eq_iff_eq Additive.ofMul]
+    rw [Additive.ofMul.apply_eq_iff_eq]
     apply S.extension.inl_injective
     rw [S.smul_eq_conjAct]
     simp only [map_mul, Section.inl_conjAct_comm,
