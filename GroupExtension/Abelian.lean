@@ -384,7 +384,7 @@ theorem mem_range_inl (e : MiddleOfTwoCocycle f) : e ∈ inl.range ↔ e.right =
   ⟨fun ⟨n, hn⟩ ↦ hn ▸ right_inl n, fun h ↦ ⟨e.left * Additive.toMul (α := N) (f (1, 1)),
     MiddleOfTwoCocycle.ext (by rw [left_inl, mul_inv_cancel_right]) (by rw [right_inl, h])⟩⟩
 
-theorem inl_injective : Function.Injective (inl (f := f)) := fun _ _ h ↦ by
+theorem inl_injective : Function.Injective (inl : N →* MiddleOfTwoCocycle f) := fun _ _ h ↦ by
   simpa only [inl, MonoidHom.coe_mk, OneHom.coe_mk, mk.injEq, mul_left_inj, and_true] using h
 
 /-- The canonical projection homomorphism -/
