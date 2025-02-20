@@ -105,7 +105,6 @@ def conjClassesEquivH1 : (toGroupExtension φ).ConjClasses ≃ groupCohomology.H
     intro s₁ s₂
     rw [Submodule.quotientRel_def]
     exact isConj_iff_sub_mem_oneCoboundaries φ s₁ s₂
-  )
 
 end SemidirectProduct
 
