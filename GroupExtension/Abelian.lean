@@ -226,7 +226,7 @@ variable (N G)
 instance setoid : Setoid (OfMulDistribMulActionWithSection N G) where
   r S S' := Nonempty (S.Equiv S')
   iseqv :=
-  { refl := fun S ↦ ⟨{
+  { refl S := ⟨{
       __ := GroupExtension.Equiv.refl S.extension
       section_comm := by
         ext g
